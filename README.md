@@ -1,4 +1,4 @@
-[![OneLoveIPFS Discord](https://img.shields.io/discord/956143542391169055.svg?logo=discord)](https://discord.gg/ZWj5NqaBeF)
+[![DTube Discord](https://img.shields.io/discord/956143542391169055.svg?logo=discord)](https://discord.gg/QsBnrwqsSV)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 [![License](https://img.shields.io/github/license/oneloveipfs/ipfsVideoUploader)](https://github.com/oneloveipfs/ipfsVideoUploader/blob/master/LICENSE)
 

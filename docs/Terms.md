@@ -226,4 +226,4 @@ If any term, clause or provision of these Terms is deemed to be unlawful, void o
 This Agreement is the entire agreement between you and us concerning the Service. It supersedes all prior or contemporaneous agreements between you and us. We may modify this user agreement at any time. If we make changes to this agreement that materially affect your rights, we will provide notice and keep this edition available as an archive. By continuing to use the Services after a change to this agreement, you agree to those changes.
 
 ## 28. Contact Details
-If you have any questions regarding the Terms of Service, contact graylan00@protonmail.com.
+If you have any questions regarding the Terms of Service, contact fasolo97@proton.me.

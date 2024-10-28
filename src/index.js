@@ -83,9 +83,7 @@ app.get('/login',(request,response) => {
             })
     }
 
-    if (request.query.network === 'dtc') {
-        response.status(410).send({error: 'Avalon logins are deprecated'})
-    } else Auth.generateEncryptedMemo(request.query.user,(err,memo) => {
+    Auth.generateEncryptedMemo(request.query.user,(err,memo) => {
         if (err) return response.send({error: err})
         response.send({encrypted_memo: memo, error: null})
     })

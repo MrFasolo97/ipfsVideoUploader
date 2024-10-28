@@ -163,14 +163,14 @@ const menuTemplate = [
     }, {
         role: 'help',
         submenu: [
-            { label: 'Learn More', click: () => shell.openExternal('https://oneloveipfs.com') },
-            { label: 'Documentation', click: () => shell.openExternal('https://docs.oneloveipfs.com') },
-            { label: 'Report An Issue', click: () => shell.openExternal('https://github.com/oneloveipfs/ipfsVideoUploader/issues') },
-            { label: 'OneLoveIPFS Discord Server', click: () => shell.openExternal('https://discord.gg/ZWj5NqaBeF') },
-            { label: 'OneLoveIPFS Matrix Space', click: () => shell.openExternal('https://matrix.to/#/#oneloveipfs:privex.io') },
+            // { label: 'Learn More', click: () => shell.openExternal('https://oneloveipfs.com') },
+            // { label: 'Documentation', click: () => shell.openExternal('https://docs.oneloveipfs.com') },
+            { label: 'Report An Issue', click: () => shell.openExternal('https://github.com/MrFasolo97/ipfsVideoUploader/issues') },
+            { label: 'OneLoveIPFS Discord Server', click: () => shell.openExternal('https://discord.gg/QsBnrwqsSV') },
+            // { label: 'OneLoveIPFS Matrix Space', click: () => shell.openExternal('https://matrix.to/#/#oneloveipfs:privex.io') },
             { type: 'separator' },
-            { label: 'Source Code', click: () => shell.openExternal('https://github.com/oneloveipfs/ipfsVideoUploader') },
-            { label: 'View License', click: () => shell.openExternal('https://github.com/oneloveipfs/ipfsVideoUploader/blob/master/LICENSE') }
+            { label: 'Source Code', click: () => shell.openExternal('https://github.com/MrFasolo97/ipfsVideoUploader') },
+            { label: 'View License', click: () => shell.openExternal('https://github.com/MrFasolo97/ipfsVideoUploader/blob/master/LICENSE') }
         ]
     }
 ]
