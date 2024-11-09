@@ -8,6 +8,7 @@ const fs = require('fs')
 const Express = require('express')
 const Parser = require('body-parser')
 const CORS = require('cors')
+const RateLimit = require('express-rate-limit')
 const app = Express()
 const http = require('http').Server(app)
 
@@ -540,7 +541,12 @@ app.get('/get_alias',(req,res) => {
     Authenticate(req,res,false,(mainUser,mainNetwork) => res.send(db.getAliasedUsers(mainUser,mainNetwork)))
 })
 
-app.put('/update_alias',Parser.json(),(req,res) => {
+const updateAliasLimiter = RateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+});
+
+app.put('/update_alias',Parser.json(),updateAliasLimiter,(req,res) => {
     // Access token should belong to the main account
     Authenticate(req,res,false,(mainUser,mainNetwork) => {
         if (!req.body.operation)
