@@ -537,7 +537,12 @@ app.put('/update_settings',Parser.json(),(req,res) => {
     })
 })
 
-app.get('/get_alias',(req,res) => {
+const getAliasLimiter = RateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+});
+
+app.get('/get_alias', getAliasLimiter, (req,res) => {
     Authenticate(req,res,false,(mainUser,mainNetwork) => res.send(db.getAliasedUsers(mainUser,mainNetwork)))
 })
 
