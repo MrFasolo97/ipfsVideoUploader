@@ -347,6 +347,7 @@ let uploadOps = {
                             let filepath = path.resolve(SAFE_ROOT, json.Upload.Storage.Path);
                             if (!filepath.startsWith(SAFE_ROOT)) {
                                 return callback(new Error('Invalid file path'));
+                            }
                             fs.unlinkSync(filepath)
                             encoderRegister[db.toFullUsername(user,network)].socket.emit('error',{
                                 method: 'hlsencode',
