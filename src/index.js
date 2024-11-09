@@ -337,9 +337,12 @@ app.post('/encoder/self/complete',(req,res) => {
 app.get('/hashes',(request,response) => {
     // API to get IPFS hashes of uploaded files
     let typerequested = request.query.hashtype
+    if (typeof(typerequested) !== 'string') {
+        return response.status(400).send("BAD REQUEST");
+    }
     if (typerequested === '' || !typerequested) {
         typerequested = db.getPossibleTypes()
-    } else typerequested.split(',');
+    } else typerequested = typerequested.split(',');
 
     if (!request.query.user || request.query.user === '')
         // Username not specified, return all hashes (either all videos, snaps or sprites, or all three)
