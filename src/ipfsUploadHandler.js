@@ -343,6 +343,10 @@ let uploadOps = {
                     else
                         // error if duplicate sprite uploads
                         if (!json.Upload.MetaData.selfEncode && encoderRegister[db.toFullUsername(user,network)] && encoderRegister[db.toFullUsername(user,network)].socket) {
+                            const SAFE_ROOT = Config.tusdUploadDir; // Define a safe root directory
+                            let filepath = path.resolve(SAFE_ROOT, json.Upload.Storage.Path);
+                            if (!filepath.startsWith(SAFE_ROOT)) {
+                                return callback(new Error('Invalid file path'));
                             fs.unlinkSync(filepath)
                             encoderRegister[db.toFullUsername(user,network)].socket.emit('error',{
                                 method: 'hlsencode',
