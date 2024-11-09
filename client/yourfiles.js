@@ -7,7 +7,7 @@ function loadPins(type) {
         let renderer = new TbodyRenderer()
         let totalSize = 0
         for (let i = 0; i < res.data.length; i++) {
-            renderer.appendRow('<a target="_blank" rel="noreferrer" href="https://video.oneloveipfs.com/ipfs/'+res.data[i].cid+'">'+res.data[i].cid+'</a>',abbrevateFilesize(res.data[i].size))
+            renderer.appendRow('<a target="_blank" rel="noreferrer" href="https://video.dtube.app/ipfs/'+res.data[i].cid+'">'+res.data[i].cid+'</a>',abbrevateFilesize(res.data[i].size))
             totalSize += res.data[i].size
         }
         document.getElementById('hashesTbody').innerHTML = renderer.renderRow()

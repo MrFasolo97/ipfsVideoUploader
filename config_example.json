@@ -11,7 +11,7 @@
     "enforceIPFSOnline": true,
     "tokenExpiry": 86400,
     "tokenApp": "oneloveipfs",
-    "upstream": "https://uploader.oneloveipfs.com",
+    "upstream": "https://upload.dtube.app",
 
     "admins":[],
     "Encoder": {
@@ -36,7 +36,7 @@
     "ClientConfig": {
         "authIdentifier": "oneloveipfs_login",
         "authTimeoutBlocks": 20,
-        "gateway": "https://video.oneloveipfs.com",
+        "gateway": "https://video.dtube.app",
         "useUserPreferredGateway": true,
         "hivesignerEnabled": true,
         "hivesignerApp": "ipfsuploader.app",
@@ -54,7 +54,7 @@
     "Build": {
         "number": 11,
         "version": "v3.1.0",
-        "link": "https://github.com/oneloveipfs/ipfsVideoUploader/releases"
+        "link": "https://github.com/MrFasolo97/ipfsVideoUploader/releases"
     },
 
     "Skynet": {
@@ -65,7 +65,7 @@
         "apiKey": ""
     },
 
-    "tusdUploadDir": "/Users/techcoderx/tusfiles",
+    "tusdUploadDir": "/Users/fasolo97/tusfiles",
     "socketTimeout": 600000,
 
     "Shawp": {

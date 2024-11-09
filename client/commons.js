@@ -1,6 +1,6 @@
 // HiveAuth
 const APP_META = {
-    name: 'oneloveipfs',
+    name: 'dtube_paid_uploader',
     description: 'IPFS hosting service'
 }
 
