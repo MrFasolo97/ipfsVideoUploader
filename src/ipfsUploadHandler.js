@@ -390,11 +390,15 @@ let uploadOps = {
                         return emitToUID(json.Upload.ID,'error',{ error: 'Uploaded file exceeds max size allowed by server encoder' })
 
                     let outputResolutions = helpers.determineOutputs(width,height,Config.Encoder.outputs)
-
+                    filePath = fs.realpathSync(path.resolve(defaultDir, json.Upload.ID));
+                    // Security check against path traversal. Maybe warn the admin?
+                    if (!filePath.startsWith(defaultDir)) {
+                        return callback();
+                    }
                     // Create folders
-                    fs.mkdirSync(defaultDir+'/'+json.Upload.ID)
+                    fs.mkdirSync(filePath)
                     for (let r in outputResolutions)
-                        fs.mkdirSync(defaultDir+'/'+json.Upload.ID+'/'+outputResolutions[r]+'p')
+                        fs.mkdirSync(filePath+'/'+outputResolutions[r]+'p')
                     
                     // Encoding ops
                     const ops = helpers.hlsEncode(
@@ -405,7 +409,7 @@ let uploadOps = {
                         Config.Encoder.quality,
                         outputResolutions,
                         Config.spritesEnabled && json.Upload.MetaData.createSprite,
-                        defaultDir+'/'+json.Upload.ID,
+                        filePath,
                         Config.Encoder.threads,
                         (id, resolution, p) => {
                             emitToUID(id,'progress',{
@@ -434,12 +438,12 @@ let uploadOps = {
                             emitToUID(json.Upload.ID,'begin',s,true)
                             
                             // Construct master playlist, thumbnail
-                            let masterPlaylist = helpers.createMasterPlaylist(defaultDir+'/'+json.Upload.ID,outputResolutions)
+                            let masterPlaylist = helpers.createMasterPlaylist(filePath,outputResolutions)
                             if (!masterPlaylist.success) {
                                 emitToUID(json.Upload.ID,'error',{ error: masterPlaylist.error },false)
                                 return nextJob()
                             }
-                            let hasThumbnail = helpers.hlsThumbnail(json.Upload.MetaData.thumbnailFname,defaultDir,defaultDir+'/'+json.Upload.ID)
+                            let hasThumbnail = helpers.hlsThumbnail(json.Upload.MetaData.thumbnailFname,filePath,filePath+'/'+json.Upload.ID)
 
                             s.step = 'ipfsadd'
                             emitToUID(json.Upload.ID,'begin',s,true)
@@ -449,7 +453,7 @@ let uploadOps = {
                             let folderhash, spritehash
                             let addProgress = {
                                 progress: 0,
-                                total: helpers.recursiveFileCount(defaultDir+'/'+json.Upload.ID) + 1
+                                total: helpers.recursiveFileCount(filePath) + 1
                             }
                             for await (const f of ipfsAPI.addAll(globSource(defaultDir,json.Upload.ID+'/**'),{cidVersion: 0, pin: true})) {
                                 if (f.path.endsWith(json.Upload.ID))
