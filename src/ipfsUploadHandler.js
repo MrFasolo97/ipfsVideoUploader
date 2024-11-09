@@ -155,6 +155,11 @@ const trimTrailingSlash = (str) => {
 
 const processSingleVideo = async (id,user,network,cb) => {
     let vpath = Config.tusdUploadDir + '/' + id
+    filePath = fs.realpathSync(path.resolve(Config.tusdUploadDir, id));
+    // Security check against path traversal. Maybe warn the admin?
+    if (!filePath.startsWith(Config.tusdUploadDir)) {
+        cb({ error: 'Could not find upload' });
+    }
     if (!fs.existsSync(vpath)) return cb({ error: 'Could not find upload' })
     let spriteGen = await addSprite(vpath,id)
     // Video hash and usage should already been handled previously
