@@ -81,7 +81,6 @@ let Shawp = {
                         cb(null,d.data.result)
                 })
                 break
-                break
             case Shawp.methods.Steem:
                 cb('Deprecated')
             default:
