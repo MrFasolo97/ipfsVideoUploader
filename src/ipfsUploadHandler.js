@@ -1,7 +1,7 @@
 const Multer = require('multer')
 const IPFS = require('ipfs-http-client')
 // const Skynet = require('@nebulous/skynet')
-const CID = require('multiformats/cid').CID;
+const CID = import('multiformats/cid')
 const Shell = require('shelljs')
 const FormData = require('form-data')
 const axios = require('axios')
@@ -10,7 +10,7 @@ const fs = require('fs')
 const async = require('async')
 const WebVTT = require('node-webvtt')
 const Socket = require('socket.io')
-const path = require('node:path'); 
+const path = require('node:path');
 const Config = require('./config')
 const db = require('./dbManager')
 const Auth = require('./authManager')
