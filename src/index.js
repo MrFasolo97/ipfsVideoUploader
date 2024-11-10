@@ -9,6 +9,7 @@ const Express = require('express')
 const Parser = require('body-parser')
 const RateLimit = require('express-rate-limit')
 const CORS = require('cors')
+const RateLimit = require('express-rate-limit')
 const app = Express()
 const http = require('http').Server(app)
 
@@ -367,8 +368,11 @@ app.get('/hashes',(request,response) => {
 })
 
 app.get('/pinsByType',(request,response) => {
-    // API to get details of pins by tyle
+    // API to get details of pins by type
     let typerequested = request.query.hashtype
+    if (typeof(typerequested) !== 'string') {
+        return response.status(400).send("BAD REQUEST");
+    }
     if (typerequested === '' || !typerequested)
         return response.status(400).send({error: 'Hash type not specified'})
 

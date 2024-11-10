@@ -130,6 +130,9 @@ const spk = {
         }
     },
     retrieveIPFS: async (hash) => {
+        if (!isValidIPFSHash(hash)) {
+            return 400; // Bad Request
+        }
         try {
             let gwFileInfo = await axios.head(SPK_GATEWAY+'/ipfs/'+hash,{
                 timeout: SPK_GATEWAY_TIMEOUT,
@@ -142,6 +145,12 @@ const spk = {
             return 404
         }
     }
+}
+
+const isValidIPFSHash = (hash) => {
+    const base58Pattern = /^[Qm][1-9A-HJ-NP-Za-km-z]{44}$/;
+    const base32Pattern = /^b[1-9A-HJ-NP-Za-km-z]{58}$/;
+    return base58Pattern.test(hash) || base32Pattern.test(hash);
 }
 
 module.exports = spk
