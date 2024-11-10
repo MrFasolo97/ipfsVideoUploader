@@ -313,7 +313,7 @@ let uploadOps = {
         switch (json.Upload.MetaData.type) {
             case 'hlsencode':
                 // create folders if not exist
-                const workingDir = path.resolve(defaultDir, json.Upload.Storage.Path);
+                const workingDir = path.resolve(defaultDir, json.Upload.MetaData.encodeID);
                 if (!workingDir.startsWith(defaultDir)) {
                     return callback(new Error('Invalid directory path'));
                 }
