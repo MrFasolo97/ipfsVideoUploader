@@ -2,6 +2,7 @@ const ffmpeg = require('fluent-ffmpeg')
 const Shell = require('shelljs')
 const fs = require('fs')
 const config = require('./config')
+const { execFile } = require('child_process');
 
 const encoderOptions = [
     '-hls_time 5',
@@ -57,7 +58,7 @@ let helpers = {
         return l
     },
     createSpriteInContainer: (filepath, destDir) => {
-        return new Promise((rs) => Shell.exec(__dirname+'/../scripts/dtube-sprite.sh ' + filepath + ' ' + destDir+'/sprite.jpg',(exitCode) => rs(exitCode === 0)))
+        return new Promise((rs) => execFile(__dirname+'/../scripts/dtube-sprite.sh', [filepath, destDir+'/sprite.jpg'], (error) => rs(!error)))
     },
     determineOutputs: (width,height,possibleOutputs = []) => {
         let outputResolutions = []
