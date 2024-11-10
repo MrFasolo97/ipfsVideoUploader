@@ -113,7 +113,7 @@ app.post('/logincb',(request,response) => {
     })
 })
 
-app.post('/loginsig',(request,response) => {
+app.post('/loginsig', authLimiter, (request,response) => {
     // Signature based auth
     Auth.verifyAuthSignature(request.body,(valid,error) => {
         if (!valid)
@@ -133,7 +133,7 @@ app.post('/loginsig',(request,response) => {
     })
 })
 
-app.get('/auth',(request,response) => {
+app.get('/auth', authLimiter, (request,response) => {
     let access_token = request.query.access_token
     Auth.verifyAuth(access_token,false,(err,res) => {
         if (err) return response.status(401).send({error: err})
