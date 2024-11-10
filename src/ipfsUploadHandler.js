@@ -9,6 +9,7 @@ const fs = require('fs')
 const async = require('async')
 const WebVTT = require('node-webvtt')
 const Socket = require('socket.io')
+const path = require('node:path'); 
 const Config = require('./config')
 const db = require('./dbManager')
 const Auth = require('./authManager')
@@ -312,7 +313,10 @@ let uploadOps = {
         switch (json.Upload.MetaData.type) {
             case 'hlsencode':
                 // create folders if not exist
-                const workingDir = defaultDir+'/'+json.Upload.MetaData.encodeID
+                const workingDir = path.resolve(defaultDir, json.Upload.Storage.Path);
+                if (!workingDir.startsWith(defaultDir)) {
+                    return callback(new Error('Invalid directory path'));
+                }
                 if (!fs.existsSync(workingDir))
                     fs.mkdirSync(workingDir)
                 if (json.Upload.MetaData.output !== 'sprite') {
