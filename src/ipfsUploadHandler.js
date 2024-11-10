@@ -350,6 +350,9 @@ let uploadOps = {
                         } else if (json.Upload.MetaData.selfEncode)
                             emitToUID(json.Upload.MetaData.encodeID,'error',{ error: 'duplicate output upload '+json.Upload.MetaData.output+'p idx '+json.Upload.MetaData.idx })
                 } else {
+                    if (!filepath.startsWith(workingDir)) {
+                        return callback(new Error('Invalid file path'));
+                    }
                     if (!fs.existsSync(workingDir+'/sprite.jpg'))
                         fs.renameSync(filepath,workingDir+'/sprite.jpg')
                     else
