@@ -7,6 +7,7 @@ const Shawp = require('./shawp')
 const fs = require('fs')
 const Express = require('express')
 const Parser = require('body-parser')
+const RateLimit = require('express-rate-limit')
 const CORS = require('cors')
 const app = Express()
 const http = require('http').Server(app)
@@ -25,6 +26,12 @@ app.get('/package-lock.json',(req,res) => {return res.status(404).redirect('/404
 
 app.use(Express.static(__dirname+'/..', { dotfiles: 'deny' }));
 app.use(CORS())
+
+
+const authLimiter = RateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+});
 
 // body parser
 const rawBodySaver = (req, res, buf, encoding) => {
@@ -137,27 +144,27 @@ app.post('/uploadVideo',(request,response) => {
     response.status(410).send({error: 'Non-resumable video upload API is depreciated. Please use Tus resumable video uploads. For more info, please refer to ResumableUploads.md in documentation.'})
 })
 
-app.post('/uploadImage',async (request,response) => {
+app.post('/uploadImage', authLimiter, async (request,response) => {
     if (Config.enforceIPFSOnline && await FileUploader.isIPFSOnline() === false) return response.status(503).send({error: 'IPFS daemon is offline'})
     Authenticate(request,response,true,(user,network) => FileUploader.uploadImage(user,network,request,response))
 })
 
-app.post('/uploadSubtitle',async (request,response) => {
+app.post('/uploadSubtitle', authLimiter, async (request,response) => {
     if (Config.enforceIPFSOnline && await FileUploader.isIPFSOnline() === false) return response.status(503).send({error: 'IPFS daemon is offline'})
     Authenticate(request,response,true,(user,network) => FileUploader.uploadSubtitles(user,network,request,response))
 })
 
-app.post('/uploadStream',async (request,response) => {
+app.post('/uploadStream', authLimiter, async (request,response) => {
     if (Config.enforceIPFSOnline && await FileUploader.isIPFSOnline() === false) return response.status(503).send({error: 'IPFS daemon is offline'})
     Authenticate(request,response,true,(user,network) => FileUploader.uploadStream(user,network,request,response))
 })
 
-app.post('/uploadChunk',Parser.json({ verify: rawBodySaver }),Parser.urlencoded({ verify: rawBodySaver, extended: true }),Parser.raw({ verify: rawBodySaver, type: '*/*' }),async (request,response) => {
+app.post('/uploadChunk', authLimiter, Parser.json({ verify: rawBodySaver }),Parser.urlencoded({ verify: rawBodySaver, extended: true }),Parser.raw({ verify: rawBodySaver, type: '*/*' }),async (request,response) => {
     if (Config.enforceIPFSOnline && await FileUploader.isIPFSOnline() === false) return response.status(503).send({error: 'IPFS daemon is offline'})
     Authenticate(request,response,true,(user,network) => FileUploader.uploadChunk(user,network,request,response))
 })
 
-app.post('/uploadVideoResumable',Parser.json({ verify: rawBodySaver }),Parser.urlencoded({ verify: rawBodySaver, extended: true }),Parser.raw({ verify: rawBodySaver, type: '*/*' }),(request,response) => {
+app.post('/uploadVideoResumable', authLimiter, Parser.json({ verify: rawBodySaver }),Parser.urlencoded({ verify: rawBodySaver, extended: true }),Parser.raw({ verify: rawBodySaver, type: '*/*' }),(request,response) => {
     if (!request.body || !request.body.HTTPRequest || !request.body.HTTPRequest.Header)
         return response.status(400).send({ error: 'Bad request' })
     else if (!Array.isArray(request.body.HTTPRequest.Header.Authorization) || request.body.HTTPRequest.Header.Authorization.length === 0)
@@ -212,7 +219,7 @@ app.post('/uploadVideoResumable',Parser.json({ verify: rawBodySaver }),Parser.ur
     // console.log(request.headers['hook-name'],request.body.Upload)
 })
 
-app.post('/spk/pin',Parser.json({ verify: rawBodySaver }),(req,res) => {
+app.post('/spk/pin', authLimiter, Parser.json({ verify: rawBodySaver }),(req,res) => {
     Authenticate(req,res,true,(user,network) => {
         if (req.body.type !== 'hls' && req.body.type !== 'thumbnails')
             return res.status(401).send({error: 'type must be hls or thumbnails'})
@@ -229,13 +236,13 @@ app.get('/spk/pin/statuses',(req,res) => {
     res.send(FileUploader.spkPinRegister())
 })
 
-app.get('/spk/pin/status',(req,res) => {
+app.get('/spk/pin/status', authLimiter, (req,res) => {
     Authenticate(req,res,false,(user,network) => {
         res.send(FileUploader.spkPinsRegisterByUser(user,network))
     })
 })
 
-app.get('/spk/pin/status/:id',(req,res) => {
+app.get('/spk/pin/status/:id', authLimiter, (req,res) => {
     Authenticate(req,res,false,(user,network) => {
         let result = FileUploader.spkPinsRegisterByUserAndID(user,network,req.params.id)
         if (!result)
@@ -253,7 +260,7 @@ app.get('/usage',(request,response) => {
 })
 
 // Get everyone's usage. Admin only API
-app.get('/allusage',(request,response) => {
+app.get('/allusage', authLimiter, (request,response) => {
     if (!Config.Shawp.Enabled) response.status(404).send({ error: 'Shawp is not enabled' })
     Authenticate(request,response,false,(user) => {
         if (!Config.admins.includes(user)) return response.status(403).send({error:'Not an admin'})
@@ -293,7 +300,7 @@ app.get('/encoder/stats',(req,res) => {
     })
 })
 
-app.post('/encoder/self/register',(req,res) => {
+app.post('/encoder/self/register', authLimiter, (req,res) => {
     Authenticate(req,res,true,(user,network) => {
         if (!req.query.outputs)
             return res.status(401).send({ error: 'comma-separated output resolutions are required' })
@@ -308,14 +315,14 @@ app.post('/encoder/self/register',(req,res) => {
     })
 })
 
-app.delete('/encoder/self/deregister',(req,res) => {
+app.delete('/encoder/self/deregister', authLimiter, (req,res) => {
     Authenticate(req,res,false,(user,network) => {
         FileUploader.selfEncoderDeregister(db.toFullUsername(user,network))
         return res.send({success: true})
     })
 })
 
-app.get('/encoder/self/get',(req,res) => {
+app.get('/encoder/self/get', authLimiter, (req,res) => {
     Authenticate(req,res,false,(user,network) => {
         return res.send(FileUploader.selfEncoderGet(db.toFullUsername(user,network)))
     })
@@ -325,7 +332,7 @@ app.get('/encoder/self/all',(req,res) => {
     return res.send(FileUploader.selfEncoderGetAll())
 })
 
-app.post('/encoder/self/complete',(req,res) => {
+app.post('/encoder/self/complete', authLimiter, (req,res) => {
     Authenticate(req,res,false,(user,network) => {
         if (!FileUploader.selfEncoderGet(db.toFullUsername(user,network)).id)
             return res.send({success: false})
@@ -430,7 +437,7 @@ app.get('/shawp_head_blocks',(req,res) => {
     })
 })
 
-app.get('/shawp_refill_admin',(req,res) => {
+app.get('/shawp_refill_admin', authLimiter, (req,res) => {
     if (!Config.Shawp.Enabled) return res.status(404).end()
     Authenticate(req,res,false,(user) => {
         if (!Config.admins.includes(user)) return res.status(403).send({error:'Not an admin'})
@@ -455,14 +462,14 @@ app.get('/shawp_refill_admin',(req,res) => {
     })
 })
 
-app.get('/shawp_refill_history',(req,res) => {
+app.get('/shawp_refill_history', authLimiter, (req,res) => {
     if (!Config.Shawp.Enabled) return res.status(404).end()
     Authenticate(req,res,false,(user,network) => {
         return res.send(Shawp.getRefillHistory(user,network,req.query.start || 0,req.query.count || 100))
     })
 })
 
-app.get('/shawp_refill_history_admin',(req,res) => {
+app.get('/shawp_refill_history_admin', authLimiter, (req,res) => {
     if (!Config.Shawp.Enabled) return res.status(404).end()
     Authenticate(req,res,false,(user) => {
         if (!Config.admins.includes(user)) return res.status(403).send({error:'Not an admin'})
@@ -470,14 +477,14 @@ app.get('/shawp_refill_history_admin',(req,res) => {
     })
 })
 
-app.get('/shawp_consumption_history',(req,res) => {
+app.get('/shawp_consumption_history', authLimiter, (req,res) => {
     if (!Config.Shawp.Enabled) return res.status(404).end()
     Authenticate(req,res,false,(user,network) => {
         return res.send(Shawp.getConsumeHistory(user,network,req.query.start || 0,req.query.count || 100))
     })
 })
 
-app.get('/shawp_consumption_history_admin',(req,res) => {
+app.get('/shawp_consumption_history_admin', authLimiter, (req,res) => {
     if (!Config.Shawp.Enabled) return res.status(404).end()
     Authenticate(req,res,false,(user) => {
         if (!Config.admins.includes(user)) return res.status(403).send({error:'Not an admin'})
@@ -485,7 +492,7 @@ app.get('/shawp_consumption_history_admin',(req,res) => {
     })
 })
 
-app.get('/shawp_user_info',(req,res) => {
+app.get('/shawp_user_info', authLimiter, (req,res) => {
     if (!Config.Shawp.Enabled) return res.status(404).end()
     Authenticate(req,res,false,(user,network) => {
         let shawpuserdetail = Shawp.User(user,network)
@@ -498,7 +505,7 @@ app.get('/shawp_user_info',(req,res) => {
     })
 })
 
-app.get('/shawp_user_info_admin',(req,res) => {
+app.get('/shawp_user_info_admin', authLimiter, (req,res) => {
     if (!Config.Shawp.Enabled) return res.status(404).end()
     Authenticate(req,res,false,(user,network) => {
         if (!Config.admins.includes(db.toFullUsername(user,network)))
@@ -511,11 +518,11 @@ app.get('/shawp_user_info_admin',(req,res) => {
 app.get('/proxy_server',(req,res) => res.send({server: ''}))
 app.get('/latest_build',(req,res) => res.send(Config.Build))
 
-app.get('/user_info',(req,res) => {
+app.get('/user_info', authLimiter, (req,res) => {
     Authenticate(req,res,false,(user,network) => res.send(db.getUserInfo(user,network)))
 })
 
-app.put('/update_settings',Parser.json(),(req,res) => {
+app.put('/update_settings', authLimiter, Parser.json(),(req,res) => {
     Authenticate(req,res,false,(user,network) => {
         // Validators
         for (i in req.body) {
@@ -533,11 +540,11 @@ app.put('/update_settings',Parser.json(),(req,res) => {
     })
 })
 
-app.get('/get_alias',(req,res) => {
+app.get('/get_alias', authLimiter, (req,res) => {
     Authenticate(req,res,false,(mainUser,mainNetwork) => res.send(db.getAliasedUsers(mainUser,mainNetwork)))
 })
 
-app.put('/update_alias',Parser.json(),(req,res) => {
+app.put('/update_alias', authLimiter, Parser.json(),(req,res) => {
     // Access token should belong to the main account
     Authenticate(req,res,false,(mainUser,mainNetwork) => {
         if (!req.body.operation)
