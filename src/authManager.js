@@ -1,13 +1,14 @@
-const axios = require('axios')
-const HiveSigner = require('hivesigner')
-const JWT = require('jsonwebtoken')
-const Crypto = require('crypto-js')
-const fs = require('fs')
-const { EOL } = require('os')
-const Config = require('./config')
-const Shawp = require('./shawp')
-const HivecryptPro = require('./hivecryptPro')
-const dir = process.env.ONELOVEIPFS_DATA_DIR || require('os').homedir() + '/.oneloveipfs'
+import axios from 'axios'
+import * as HiveSigner from 'hivesigner';
+import JWT from 'jsonwebtoken';
+import pkg from 'crypto-js';
+import * as fs from 'node:fs'
+import { EOL } from 'node:os';
+import * as Shawp from './shawp.js';
+import * as HivecryptPro from './hivecryptPro.js'
+const { CryptoJS: Crypto } = pkg;
+const Config = JSON.parse(fs.readFileSync("./config.json"))
+const dir = process.env.ONELOVEIPFS_DATA_DIR || (await import('os')).default.homedir() + '/.oneloveipfs'
 
 // If whitelist file doesn't exist create it
 if (!fs.existsSync(dir+'/whitelist.txt'))
@@ -319,4 +320,4 @@ let auth = {
 }
 
 auth.whitelistTrim()
-module.exports = auth
+export default auth

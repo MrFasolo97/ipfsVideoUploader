@@ -28,4 +28,4 @@ class ProcessingQueue {
     }
 }
 
-module.exports = ProcessingQueue
+export default ProcessingQueue

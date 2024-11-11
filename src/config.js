@@ -1,14 +1,14 @@
-const fs = require('fs')
-const deepmerge = require('deepmerge')
-const defaultFfmpegPath = require('ffmpeg-static').replace('app.asar','app.asar.unpacked')
-const defaultFfprobePath = require('ffprobe-static').path.replace('app.asar','app.asar.unpacked')
-const dataDir = (process.env.ONELOVEIPFS_DATA_DIR || require('os').homedir() + '/.oneloveipfs')
+import fs from 'node:fs'
+import deepmerge from 'deepmerge'
+const defaultFfmpegPath = (await import('ffmpeg-static')).default.replace('app.asar','app.asar.unpacked')
+const defaultFfprobePath = (await import('ffprobe-static')).default.path.replace('app.asar','app.asar.unpacked')
+const dataDir = (process.env.ONELOVEIPFS_DATA_DIR || (await import('os')).homedir() + '/.oneloveipfs')
 const userconfigdir = dataDir+'/config.json'
 let isRemoteApp = fs.existsSync(dataDir+'/db/app_type') ? fs.readFileSync(dataDir+'/db/app_type','utf-8').trim() === '1' : false
-let defaultConfig = require('../config_example.json')
+let defaultConfig = await JSON.parse(fs.readFileSync('./config_example.json'));
 
 try {
-    defaultConfig = require('../config.json')
+    defaultConfig = await JSON.parse(fs.readFileSync('./config.json'));
 } catch {
     // using example config
 }
@@ -68,4 +68,4 @@ if (defaultConfig.Encoder.outputs.length > 0) {
 defaultConfig.isRemoteApp = isRemoteApp
 defaultConfig.dataDir = dataDir
 
-module.exports = defaultConfig
+export default defaultConfig

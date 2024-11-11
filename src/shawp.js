@@ -1,10 +1,10 @@
-const Config = require('./config')
-const db = require('./dbManager')
-const GrapheneStreamer = require('./grapheneStreamer')
-const fs = require('fs')
-const axios = require('axios')
-const Scheduler = require('node-schedule')
-const dbDir = (process.env.ONELOVEIPFS_DATA_DIR || require('os').homedir() + '/.oneloveipfs') + '/db'
+const Config = (await import('./config.js')).default
+const db = (await import('./dbManager.js')).default
+const GrapheneStreamer = (await import('./grapheneStreamer.js')).default
+import * as fs from 'node:fs'
+import axios from 'axios'
+import * as Scheduler from 'node-schedule'
+const dbDir = (process.env.ONELOVEIPFS_DATA_DIR || (await import('os')).default.homedir() + '/.oneloveipfs') + '/db'
 
 db.setupDb('shawpUsers')
 db.setupDb('shawpRefills')
@@ -326,4 +326,4 @@ let Shawp = {
     blurtStreamer
 }
 
-module.exports = Shawp
+export default Shawp

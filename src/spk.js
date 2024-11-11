@@ -1,7 +1,7 @@
 // Helper file for communicating with 3Speak APIs
-const fs = require('fs')
-const axios = require('axios')
-const tus = require('tus-js-client')
+import fs from 'node:fs'
+import axios from 'axios'
+const tus = await import('tus-js-client')
 const SPK_API_URL = 'https://studio.3speak.tv'
 const SPK_UPLOAD_URL = 'https://uploads.3speak.tv/files'
 const SPK_GATEWAY = 'https://ipfs-3speak.b-cdn.net'
@@ -153,4 +153,4 @@ const isValidIPFSHash = (hash) => {
     return base58Pattern.test(hash) || base32Pattern.test(hash);
 }
 
-module.exports = spk
+export default spk

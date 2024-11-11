@@ -1,8 +1,8 @@
 // Hivecrypt Pro
-const CryptoJS = require('crypto-js')
-const bs58 = require('bs58')
-const secp256k1 = require('secp256k1')
-const hivecrypt = require('hivecrypt')
+const CryptoJS = (await import('crypto-js')).default
+const bs58 = (await import('bs58')).default
+const secp256k1 = (await import('secp256k1')).default
+const hivecrypt = (await import('hivecrypt')).default
 
 /**
  * Network id used in WIF-encoding.
@@ -300,7 +300,7 @@ if (typeof window !== 'undefined')
         hivecrypt
     }
 
-module.exports = {
+export default {
     PrivateKey,
     PublicKey,
     Signature,

@@ -1,8 +1,7 @@
-const ffmpeg = require('fluent-ffmpeg')
-const Shell = require('shelljs')
-const fs = require('fs')
-const config = require('./config')
-const { execFile } = require('child_process');
+import ffmpeg from 'fluent-ffmpeg';
+import * as fs from 'node:fs'
+import config from './config.js'
+import { execFile } from 'node:child_process'
 
 const encoderOptions = [
     '-hls_time 5',
@@ -155,4 +154,4 @@ let helpers = {
     }
 }
 
-module.exports = helpers
+export default helpers

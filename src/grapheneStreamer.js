@@ -1,6 +1,6 @@
-const axios = require('axios')
+import axios from "axios"
 
-module.exports = class {
+export default class {
     constructor(api,irreversible,network = '',startBlock = 0) {
         this.headBlock = startBlock
         this.parsedBlock = startBlock

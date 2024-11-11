@@ -1,8 +1,8 @@
-const async = require('async')
-const encoder = require('./encoderHelpers')
-const fs = require('fs')
-const config = require('./config')
-const defaultDir = process.env.ONELOVEIPFS_DATA_DIR || require('os').homedir() + '/.oneloveipfs'
+import async from 'async'
+import encoder from 'encoderHelpers'
+import * as fs from 'node:fs'
+import config from './config'
+const defaultDir = process.env.ONELOVEIPFS_DATA_DIR || (await import('os')).homedir() + '/.oneloveipfs'
 
 module.exports = async (jobid,filepath,evt) => {
     // usually done in remote app build

@@ -1,21 +1,22 @@
-const Config = require('./config')
-const fs = require('fs')
-const axios = require('axios')
-const Express = require('express')
-const Proxy = require('http-proxy')
-const CORS = require('cors')
-const app = Express()
+import { defaultConfig as Config } from './config'
+import fs from 'node:fs'
+import axios from 'axios'
+import express from 'express'
+import path from 'node:path'
+import * as Proxy from 'http-proxy'
+import cors from 'cors'
+const app = express()
 const http = require('http').createServer(app)
 const ProxyConfig = { changeOrigin: true, target: Config.upstream }
 const ProxyAPI = Proxy.createProxyServer(ProxyConfig)
 
-app.use(Express.static(__dirname+'/..', { dotfiles: 'deny' }));
-app.use(CORS())
+app.use(express.static(path.resolve()+'/..', { dotfiles: 'deny' }));
+app.use(cors())
 
 // Webpages
-app.get('/', (request,response) => loadWebpage(__dirname+'/../client/welcome.html',response)) // Home page
-app.get('/upload', (request,response) => loadWebpage(__dirname+'/../client/uploader.html',response)) // Upload page
-app.get('/404', (request,response) => loadWebpage(__dirname+'/../client/404.html',response)) // 404 page
+app.get('/', (request,response) => loadWebpage(path.resolve()+'/client/welcome.html',response)) // Home page
+app.get('/upload', (request,response) => loadWebpage(path.resolve()+'/client/uploader.html',response)) // Upload page
+app.get('/404', (request,response) => loadWebpage(path.resolve()+'/client/404.html',response)) // 404 page
 app.get('/proxy_server',(req,res) => res.send({server: Config.upstream}))
 app.get('/config', (req,res) => {
     axios.get(Config.upstream+'/config').then(upstreamRes => {

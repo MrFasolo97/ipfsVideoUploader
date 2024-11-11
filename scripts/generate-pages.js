@@ -1,7 +1,8 @@
 // HTML page generator for markdown documentations
-const fs = require('fs')
-const { marked } = require('marked')
-const template = fs.readFileSync(__dirname+'/../client/docs.html','utf-8')
+import * as fs from 'node:fs'
+import path from 'node:path'
+import marked from 'marked'
+const template = fs.readFileSync(path.resolve()+'/client/docs.html','utf-8')
 const title = 'OneLoveIPFS Uploader'
 
 // doc/?.md file -> client/generated/?.html
@@ -11,7 +12,7 @@ const map = [
     ['FAQ.md','faq.html','FAQ']
 ]
 
-const baseRepo = __dirname+'/..'
+const baseRepo = path.resolve()+''
 const srcFolder = baseRepo+'/docs'
 const targetFolder = baseRepo+'/client/generated'
 

@@ -1,16 +1,18 @@
-const Config = require('./config')
-const FileUploader = require('./ipfsUploadHandler')
-const encoderHelper = require('./encoderHelpers')
-const db = require('./dbManager')
-const Auth = require('./authManager')
-const Shawp = require('./shawp')
-const fs = require('fs')
-const Express = require('express')
-const Parser = require('body-parser')
-const CORS = require('cors')
-const RateLimit = require('express-rate-limit')
-const app = Express()
-const http = require('http').Server(app)
+import express from 'express'
+import path from 'path'
+import cors from 'cors'
+import rateLimit from 'express-rate-limit'
+const Config = (await import('./config.js')).default
+const FileUploader = (await import('./ipfsUploadHandler.js')).default
+const encoderHelper = (await import('./encoderHelpers.js')).default
+const db = (await import('./dbManager.js')).default
+const Auth = (await import('./authManager.js')).default
+const Shawp = (await import('./shawp.js')).default
+const fs = await import('fs')
+import bodyParser from 'body-parser'
+
+const app = await new express()
+const http = await (await import('http')).Server(app)
 
 FileUploader.IPSync.init(http)
 Shawp.init()
@@ -24,11 +26,11 @@ app.get('/config.json',(req,res) => {return res.status(404).redirect('/404')})
 app.get('/package.json',(req,res) => {return res.status(404).redirect('/404')})
 app.get('/package-lock.json',(req,res) => {return res.status(404).redirect('/404')})
 
-app.use(Express.static(__dirname+'/..', { dotfiles: 'deny' }));
-app.use(CORS())
+app.use(express.static(path.resolve()+'', { dotfiles: 'deny' }));
+app.use(cors())
 
 
-const authLimiter = RateLimit({
+const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // limit each IP to 100 requests per windowMs
 });
@@ -40,17 +42,17 @@ const rawBodySaver = (req, res, buf, encoding) => {
     }
 }
 
-app.use(Parser.text())
+app.use(bodyParser.text())
 
-app.get('/', (request,response) => loadWebpage(__dirname+'/../client/welcome.html',response)) // Home page
-app.get('/upload', (request,response) => loadWebpage(__dirname+'/../client/uploader.html',response)) // Upload page
-app.get('/404', (request,response) => loadWebpage(__dirname+'/../client/404.html',response)) // 404 page
-app.get('/hivesigner', (request,response) => loadWebpage(__dirname+'/../client/hivesigner.html',response)) // HiveSigner callback
+app.get('/', (request,response) => loadWebpage(path.resolve()+'/client/welcome.html',response)) // Home page
+app.get('/upload', (request,response) => loadWebpage(path.resolve()+'/client/uploader.html',response)) // Upload page
+app.get('/404', (request,response) => loadWebpage(path.resolve()+'/client/404.html',response)) // 404 page
+app.get('/hivesigner', (request,response) => loadWebpage(path.resolve()+'/client/hivesigner.html',response)) // HiveSigner callback
 
 // documentations
-app.get('/privacy', (request,response) => loadWebpage(__dirname+'/../client/generated/privacy.html',response))
-app.get('/terms', (request,response) => loadWebpage(__dirname+'/../client/generated/terms.html',response))
-app.get('/faq', (request,response) => loadWebpage(__dirname+'/../client/generated/faq.html',response))
+app.get('/privacy', (request,response) => loadWebpage(path.resolve()+'/client/generated/privacy.html',response))
+app.get('/terms', (request,response) => loadWebpage(path.resolve()+'/client/generated/terms.html',response))
+app.get('/faq', (request,response) => loadWebpage(path.resolve()+'/client/generated/faq.html',response))
 
 app.get('/checkuser',(request,response) => {
     // Check if user is in whitelist
@@ -159,12 +161,12 @@ app.post('/uploadStream', authLimiter, async (request,response) => {
     Authenticate(request,response,true,(user,network) => FileUploader.uploadStream(user,network,request,response))
 })
 
-app.post('/uploadChunk', authLimiter, Parser.json({ verify: rawBodySaver }),Parser.urlencoded({ verify: rawBodySaver, extended: true }),Parser.raw({ verify: rawBodySaver, type: '*/*' }),async (request,response) => {
+app.post('/uploadChunk', authLimiter, bodyParser.json({ verify: rawBodySaver }),bodyParser.urlencoded({ verify: rawBodySaver, extended: true }),bodyParser.raw({ verify: rawBodySaver, type: '*/*' }),async (request,response) => {
     if (Config.enforceIPFSOnline && await FileUploader.isIPFSOnline() === false) return response.status(503).send({error: 'IPFS daemon is offline'})
     Authenticate(request,response,true,(user,network) => FileUploader.uploadChunk(user,network,request,response))
 })
 
-app.post('/uploadVideoResumable', authLimiter, Parser.json({ verify: rawBodySaver }),Parser.urlencoded({ verify: rawBodySaver, extended: true }),Parser.raw({ verify: rawBodySaver, type: '*/*' }),(request,response) => {
+app.post('/uploadVideoResumable', authLimiter, bodyParser.json({ verify: rawBodySaver }),bodyParser.urlencoded({ verify: rawBodySaver, extended: true }),bodyParser.raw({ verify: rawBodySaver, type: '*/*' }),(request,response) => {
     if (!request.body || !request.body.HTTPRequest || !request.body.HTTPRequest.Header)
         return response.status(400).send({ error: 'Bad request' })
     else if (!Array.isArray(request.body.HTTPRequest.Header.Authorization) || request.body.HTTPRequest.Header.Authorization.length === 0)
@@ -219,7 +221,7 @@ app.post('/uploadVideoResumable', authLimiter, Parser.json({ verify: rawBodySave
     // console.log(request.headers['hook-name'],request.body.Upload)
 })
 
-app.post('/spk/pin', authLimiter, Parser.json({ verify: rawBodySaver }),(req,res) => {
+app.post('/spk/pin', authLimiter, bodyParser.json({ verify: rawBodySaver }),(req,res) => {
     Authenticate(req,res,true,(user,network) => {
         if (req.body.type !== 'hls' && req.body.type !== 'thumbnails')
             return res.status(401).send({error: 'type must be hls or thumbnails'})
@@ -525,7 +527,7 @@ app.get('/user_info', authLimiter, (req,res) => {
     Authenticate(req,res,false,(user,network) => res.send(db.getUserInfo(user,network)))
 })
 
-app.put('/update_settings', authLimiter, Parser.json(),(req,res) => {
+app.put('/update_settings', authLimiter, bodyParser.json(),(req,res) => {
     Authenticate(req,res,false,(user,network) => {
         // Validators
         for (i in req.body) {
@@ -547,7 +549,7 @@ app.get('/get_alias', authLimiter, (req,res) => {
     Authenticate(req,res,false,(mainUser,mainNetwork) => res.send(db.getAliasedUsers(mainUser,mainNetwork)))
 })
 
-app.put('/update_alias', authLimiter, Parser.json(),(req,res) => {
+app.put('/update_alias', authLimiter, bodyParser.json(),(req,res) => {
     // Access token should belong to the main account
     Authenticate(req,res,false,(mainUser,mainNetwork) => {
         if (!req.body.operation)
