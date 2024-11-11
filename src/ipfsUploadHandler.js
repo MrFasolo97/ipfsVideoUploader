@@ -1,25 +1,24 @@
-const Multer = require('multer')
-const IPFS = require('ipfs-http-client')
+import { createHelia } from 'helia'
+import { Server } from 'socket.io';
+const Multer = (await import('multer')).default
 // const Skynet = require('@nebulous/skynet')
-const CID = import('multiformats/cid')
-const Shell = require('shelljs')
-const FormData = require('form-data')
-const axios = require('axios')
-const ffmpeg = require('fluent-ffmpeg')
-const fs = require('fs')
-const async = require('async')
-const WebVTT = require('node-webvtt')
-const Socket = require('socket.io')
-const path = require('node:path');
-const sanitize = require("sanitize-filename");
-const Config = require('./config')
-const db = require('./dbManager')
-const Auth = require('./authManager')
-const ProcessingQueue = require('./processingQueue')
-const helpers = require('./encoderHelpers')
-const spk = require('./spk')
-const globSource = IPFS.globSource
-const defaultDir = process.env.ONELOVEIPFS_DATA_DIR || require('os').homedir() + '/.oneloveipfs'
+const CID = (await import('multiformats/cid')).default
+const Shell = (await import('shelljs')).default
+const FormData = (await import('form-data')).default
+const axios = (await import('axios')).default
+const ffmpeg = (await import('fluent-ffmpeg')).default
+const fs = (await import('fs')).default
+const async = (await import('async')).default
+const WebVTT = (await import('node-webvtt')).default
+const path = (await import('node:path')).default
+const sanitize = (await import("sanitize-filename")).default
+const Config = (await import('./config.js')).default
+const db = (await import('./dbManager.js')).default
+const Auth = (await import('./authManager.js')).default
+const ProcessingQueue = (await import('./processingQueue.js')).default
+const helpers = (await import('./encoderHelpers.js')).default
+const spk = (await import('./spk.js')).default
+const defaultDir = process.env.ONELOVEIPFS_DATA_DIR || (await import('os')).homedir() + '/.oneloveipfs'
 
 let SocketIO, ipsync, uplstatusio, encoderdio
 let usercount = 0
@@ -86,7 +85,8 @@ const getEncoderBySocket = (socket) => {
     return null
 }
 
-const ipfsAPI = IPFS.create({ host: Config.IPFS_HOST, port: Config.IPFS_API_PORT, protocol: Config.IPFS_PROTOCOL })
+const ipfsAPI = await createHelia({ host: Config.IPFS_HOST, port: Config.IPFS_API_PORT, protocol: Config.IPFS_PROTOCOL })
+const globSource = ipfsAPI.globSource
 const streamUpload = Multer({ dest: defaultDir, limits: { fileSize: 52428800 } }) // 50MB segments
 const imgUpload = Multer({ dest: defaultDir, limits: { fileSize: 7340032 } })
 
@@ -844,7 +844,7 @@ let uploadOps = {
     },
     IPSync: {
         init: (server) => {
-            SocketIO = Socket(server, {
+            SocketIO = new Server(server, {
                 cors: {
                     origin: '*',
                     methods: ['GET','POST']
@@ -1116,4 +1116,5 @@ let uploadOps = {
     }
 }
 
-module.exports = uploadOps
+// module.exports = uploadOps
+export default uploadOps

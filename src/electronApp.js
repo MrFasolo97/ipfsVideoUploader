@@ -1,12 +1,12 @@
-const axios = require('axios')
-const { app, shell, ipcMain, dialog, BrowserWindow, Notification, Menu } = require('electron')
-const aboutWindow = require('about-window').default
-const fs = require('fs')
-const spk = require('./spk')
-const selfEncoder = require('./selfEncoderJob')
-const selfEncoderUpload = require('./selfEncoderUpload')
-const config = require('./config')
-const package = require('../package.json')
+import axios from 'axios'
+const { app, shell, ipcMain, dialog, BrowserWindow, Notification, Menu } = (await import('electron')).default
+import { openAboutWindow as aboutWindow } from 'about-window'
+import * as fs from 'node:fs'
+import spk from './spk.js'
+import selfEncoder from './selfEncoderJob.js'
+import selfEncoderUpload from './selfEncoderUpload.js'
+import { defaultConfig as config } from './config.js'
+const packageJSON = require('../package.json')
 const isMac = process.platform === 'darwin'
 const BUILD_STR = config.Build.number.toString()
 
@@ -56,9 +56,9 @@ const getIcon = () => {
 }
 
 const openAboutWindow = () => aboutWindow({
-    product_name: package.productName,
-    description: package.description,
-    license: package.license,
+    product_name: packageJSON.productName,
+    description: packageJSON.description,
+    license: packageJSON.license,
     use_version_info: true,
     icon_path: 'file://'+__dirname+'/../public/macos_icon.png',
     copyright: 'Copyright (C) 2023 TechCoderX. Build: ' + BUILD_STR
@@ -117,7 +117,7 @@ const menuTemplate = [
             }
         }, {
             label: 'Configuration Guide',
-            click: () => shell.openExternal('https://github.com/oneloveipfs/ipfsVideoUploader/blob/master/docs/ConfigDocs.md')
+            click: () => shell.openExternal('https://github.com/MrFasolo97/ipfsVideoUploader/blob/master/docs/ConfigDocs.md')
         }]
     }, {
         label: 'Edit',
