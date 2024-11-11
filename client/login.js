@@ -467,7 +467,7 @@ async function avalonLogin() {
     if (avalonKcToggled) {
         let signerUsername = document.getElementById('avalonSignerUsername').value
         let signerRole = document.getElementById('avalonSignerRole').value
-        hive_keychain.requestSignBuffer(signerUsername,'oneloveipfs_avalon_login',signerRole,async (signResult) => {
+        hive_keychain.requestSignBuffer(signerUsername,'dtube_uploader_avalon_login',signerRole,async (signResult) => {
             if (signResult.error)
                 return handleLoginError(signResult.error,'avalon')
             let validate = await avalonLoginValidate(avalonUsername,hivecryptpro.PublicKey.fromString(signResult.publicKey).toAvalonString())
