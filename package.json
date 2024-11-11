@@ -113,7 +113,7 @@
     "browserify": "^17.0.0",
     "chai": "^4.3.7",
     "electron": "^24.1.1",
-    "electron-builder": "^24.2.0",
+    "electron-builder": "^25.1.8",
     "marked": "^4.3.0",
     "mocha": "^10.2.0",
     "tinyify": "^4.0.0"
