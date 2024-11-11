@@ -11,6 +11,7 @@ const async = require('async')
 const WebVTT = require('node-webvtt')
 const Socket = require('socket.io')
 const path = require('node:path');
+const sanitize = require("sanitize-filename");
 const Config = require('./config')
 const db = require('./dbManager')
 const Auth = require('./authManager')
@@ -318,6 +319,7 @@ let uploadOps = {
         } catch (e) {
             console.log(e.toString())
         }
+        json.Upload.MetaData.output = sanitize(json.Upload.MetaData.output)
         switch (json.Upload.MetaData.type) {
             case 'hlsencode':
                 // create folders if not exist
