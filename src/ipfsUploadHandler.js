@@ -311,6 +311,7 @@ let uploadOps = {
     encoderQueue,
     handleTusUpload: async (json,user,network,callback) => {
         let filepath = json.Upload.Storage.Path
+        const SAFE_ROOT = Config.tusdUploadDir; // Define a safe root directory
         let ID = null;
         try {
             ID = CID.parse(json.Upload.ID)
@@ -321,8 +322,12 @@ let uploadOps = {
         switch (json.Upload.MetaData.type) {
             case 'hlsencode':
                 // create folders if not exist
-                const workingDir = path.resolve(defaultDir, json.Upload.MetaData.encodeID);
-                if (!workingDir.startsWith(defaultDir)) {
+                const workingDir = path.resolve(SAFE_ROOT, json.Upload.MetaData.encodeID);
+                let filepath = path.resolve(SAFE_ROOT, json.Upload.Storage.Path);
+                if (!filepath.startsWith(SAFE_ROOT)) {
+                    return callback(new Error('Invalid file path'));
+                }
+                if (!workingDir.startsWith(SAFE_ROOT)) {
                     return callback(new Error('Invalid directory path'));
                 }
                 if (!fs.existsSync(workingDir))
@@ -358,7 +363,6 @@ let uploadOps = {
                     else
                         // error if duplicate sprite uploads
                         if (!json.Upload.MetaData.selfEncode && encoderRegister[db.toFullUsername(user,network)] && encoderRegister[db.toFullUsername(user,network)].socket) {
-                            const SAFE_ROOT = Config.tusdUploadDir; // Define a safe root directory
                             let filepath = path.resolve(SAFE_ROOT, json.Upload.Storage.Path);
                             if (!filepath.startsWith(SAFE_ROOT)) {
                                 return callback(new Error('Invalid file path'));
