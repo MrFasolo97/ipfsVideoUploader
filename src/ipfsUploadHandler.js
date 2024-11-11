@@ -317,15 +317,13 @@ let uploadOps = {
             ID = ID.toString();
         } catch (e) {
             console.log(e.toString())
-            return callback(new Error('Invalid CID hash'));
         }
         switch (json.Upload.MetaData.type) {
             case 'hlsencode':
                 // create folders if not exist
                 const workingDir = path.resolve(defaultDir, json.Upload.MetaData.encodeID);
-                filepath = path.resolve(Config.tusdUploadDir, filepath);
-                if (!filepath.startsWith(Config.tusdUploadDir)) {
-                    return callback(new Error('Invalid file path'));
+                if (!workingDir.startsWith(defaultDir)) {
+                    return callback(new Error('Invalid directory path'));
                 }
                 if (!fs.existsSync(workingDir))
                     fs.mkdirSync(workingDir)
