@@ -1,7 +1,9 @@
 import ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'node:fs'
-import config from './config.js'
 import { execFile } from 'node:child_process'
+import config from './config.js'
+const sanitize = (await import("sanitize-filename")).default
+
 
 const encoderOptions = [
     '-hls_time 5',
@@ -102,6 +104,7 @@ let helpers = {
     },
     hlsThumbnail: (fname, srcDir, destDir) => {
         let hasThumbnail = false
+        fname = sanitize(fname)
         if (helpers.isValidImgFname(fname) && fs.existsSync(srcDir+'/'+fname)) {
             fs.copyFileSync(srcDir+'/'+fname,destDir+'/thumbnail.jpg')
             hasThumbnail = true
