@@ -322,6 +322,7 @@ let uploadOps = {
             return
         }
         json.Upload.MetaData.output = sanitize(json.Upload.MetaData.output)
+        json.Upload.MetaData.idx = sanitize(json.Upload.MetaData.idx)
         switch (json.Upload.MetaData.type) {
             case 'hlsencode':
                 // create folders if not exist
