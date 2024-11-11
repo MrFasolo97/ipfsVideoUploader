@@ -318,6 +318,7 @@ let uploadOps = {
             ID = ID.toString();
         } catch (e) {
             console.log(e.toString())
+            return
         }
         switch (json.Upload.MetaData.type) {
             case 'hlsencode':
