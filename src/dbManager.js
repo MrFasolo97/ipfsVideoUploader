@@ -47,6 +47,9 @@ let db = {
     },
     // User info (aliases, user settings etc.)
     setUserAlias: (mainUser,mainNetwork,aliasUser,aliasNetwork) => {
+        if (aliasUser === '__proto__' || aliasUser === 'constructor' || aliasUser === 'prototype') {
+            throw 'Invalid _aliasUser_ value!'
+        }
         let fullMain = db.toFullUsername(mainUser,mainNetwork)
         let fullAlias = db.toFullUsername(aliasUser,aliasNetwork)
         if (userInfo[fullMain] && userInfo[fullMain].aliasOf)
