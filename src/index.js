@@ -182,7 +182,7 @@ app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),body
     Auth.authenticateTus(authHeader[1],true,(e,user,network) => {
         if (e) return response.status(401).send({error: e})
         if (request.body.Upload && request.body.Upload.IsPartial)
-            return response.status(200).send()
+            return response.status(200).send({})
 
         switch (request.headers['hook-name']) {
             case "pre-create":
@@ -206,7 +206,7 @@ app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),body
                     if (isNaN(parseInt(request.body.Upload.MetaData.output)) && request.body.Upload.MetaData.output !== 'sprite')
                         return response.status(401).send({error: 'Invalid encoder output'})
                 }
-                return response.status(200).send()
+                return response.status(200).send({})
             case "post-finish":
                 request.socket.setTimeout(0)
 
@@ -215,11 +215,11 @@ app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),body
                     if (request.body.Upload.MetaData.type !== 'hlsencode')
                         FileUploader.writeUploadRegister()
                     FileUploader.pruneTusPartialUploads(request.body.Upload.PartialUploads)
-                    response.status(200).send()
+                    response.status(200).send({})
                 })
                 break
             default:
-                response.status(200).send()
+                response.status(200).send({})
                 break
         }
     })
