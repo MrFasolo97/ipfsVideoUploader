@@ -168,12 +168,12 @@ app.post('/uploadChunk', authLimiter, bodyParser.json({ verify: rawBodySaver }),
 })
 
 app.post('/uploadVideoResumable', authLimiter, bodyParser.json({ verify: rawBodySaver }),bodyParser.urlencoded({ verify: rawBodySaver, extended: true }),(request,response) => {
-
-    if (!request.headers || !request.headers.Authorization)
+    const authHeaderText = request.get("Authorization")
+    if (!authHeaderText)
         return response.status(400).send({ error: 'Bad request' })
-    else if (!Array.isArray(request.headers.Authorization) || request.headers.Authorization.length === 0)
+    else if (!authHeaderText || authHeaderText.length === 0)
         return response.status(400).send({ error: 'Missing auth headers' })
-    let authHeader = request.headers.Authorization.Authorization[0].split(' ')
+    let authHeader = authHeaderText.split(' ')
     if (authHeader.length < 2 || authHeader[0] !== 'Bearer')
         return response.status(400).send({ error: 'Auth header must be a bearer' })
     Auth.authenticateTus(authHeader[1],true,(e,user,network) => {
