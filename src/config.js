@@ -5,10 +5,22 @@ const defaultFfprobePath = (await import('ffprobe-static')).default.path.replace
 const dataDir = (process.env.ONELOVEIPFS_DATA_DIR || (await import('os')).homedir() + '/.oneloveipfs')
 const userconfigdir = dataDir+'/config.json'
 let isRemoteApp = fs.existsSync(dataDir+'/db/app_type') ? fs.readFileSync(dataDir+'/db/app_type','utf-8').trim() === '1' : false
-let defaultConfig = await JSON.parse(fs.readFileSync('./config_example.json'));
+let configPath = null;
+if (fs.existsSync('./config.json')) {
+    configPath = './config.json'
+} else if (configPath == null && fs.existsSync('../ipfsVideoUploader/config.json')) {
+    configPath = '../ipfsVideoUploader/config.json'
+}
+
+if (configPath == null && fs.existsSync('./config_example.json')) {
+    configPath = './config_example.json'
+} else if (configPath == null && fs.existsSync('../ipfsVideoUploader/config_example.json')) {
+    configPath = '../ipfsVideoUploader/config_example.json'
+}
+
 
 try {
-    defaultConfig = await JSON.parse(fs.readFileSync('./config.json'));
+    defaultConfig = await JSON.parse(fs.readFileSync(configPath));
 } catch {
     // using example config
 }
