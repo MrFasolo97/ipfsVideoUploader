@@ -181,7 +181,7 @@ app.post('/uploadVideoResumable', authLimiter, bodyParser.json({ verify: rawBody
     
     Auth.authenticateTus(authHeader[1],true,(e,user,network) => {
         if (e) return response.status(401).send({error: e})
-        if (request.body.Upload.IsPartial)
+        if (request.body.Upload && request.body.Upload.IsPartial)
             return response.status(200).send()
 
         switch (request.headers['hook-name']) {
