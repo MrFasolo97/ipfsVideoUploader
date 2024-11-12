@@ -1,7 +1,9 @@
-const tus = require('tus-js-client')
-const fs = require('fs')
-const { tusError } = require('./spk')
-const defaultDir = process.env.ONELOVEIPFS_DATA_DIR || require('os').homedir() + '/.oneloveipfs'
+const tus = (await import('tus-js-client')).default
+import * as fs from 'node:fs'
+import { homedir } from 'node:os'
+
+const { tusError } = (await import('./spk')).default
+const defaultDir = process.env.ONELOVEIPFS_DATA_DIR || homedir() + '/.oneloveipfs'
 
 module.exports = (encodeId,uploadId,token,outputs,threads,endpoint,evt) => {
     uploadOutputs(token,encodeId,uploadId,endpoint,outputs,threads,(success) => evt('self_encode_upload_result',{ success }))
