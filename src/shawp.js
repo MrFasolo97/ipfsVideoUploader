@@ -144,18 +144,23 @@ let Shawp = {
             result += 'UNKNOWN'
         return result
     },
-    ValidatePayment: async (receiver,memo) => {
+    ValidatePayment: (receiver,memo) => {
         let network = 'all'
-        if (await memo !== '' && ! await memo.startsWith('to: @') && ! await memo.startsWith('to: hive@')) return [] // Memo must be empty or begin with "to: @" or "to: network@"
-        if (await memo && await memo.startsWith('to: @')) {
-            let otheruser = await memo.replace('to: @','')
-            if ((await import('./authManager.js')).default.invalidHiveUsername(otheruser) === null) receiver = otheruser
+        if (memo !== '' && !memo.startsWith('to: @') && !memo.startsWith('to: hive@')) return [] // Memo must be empty or begin with "to: @" or "to: network@"
+        if (memo && memo.startsWith('to: @')) {
+            let otheruser = memo.replace('to: @','')
+            import('./authManager.js').then((auth) => {
+                if (auth.default.invalidHiveUsername(otheruser) === null) receiver = otheruser
+                return [receiver,network]
+            })
         } else if (memo && memo.startsWith('to: hive@')) {
-            let otheruser = await memo.replace('to: hive@','')
-            if ((await import('./authManager.js')).default.invalidHiveUsername(otheruser) == null) receiver = otheruser
+            let otheruser = memo.replace('to: hive@','')
             network = 'hive'
+            import('./authManager.js').then((auth) => {
+                if (auth.default.invalidHiveUsername(otheruser) === null) receiver = otheruser
+                return [receiver,network]
+            })
         }
-        return [receiver,network]
     },
     AddUser: async (username,network,nowrite) => {
         let fullusername = await db.toFullUsername(username,network,true)
