@@ -199,8 +199,7 @@ const getDuration = (path) => {
 let uploadOps = {
     isIPFSOnline: async () => {
         try {
-
-            for await (const i of ipfsAPI.blockstore.getAll.bw()) {}
+            for await (const i of ipfsAPI.stats.bw()) {}
         } catch {
             return false
         }
