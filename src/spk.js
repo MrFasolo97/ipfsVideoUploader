@@ -130,27 +130,34 @@ const spk = {
         }
     },
     retrieveIPFS: async (hash) => {
-        if (!isValidIPFSHash(hash)) {
+        hash = parseIPFSHash(hash)
+        if ( hash == null ) {
             return 400; // Bad Request
-        }
-        try {
-            let gwFileInfo = await axios.head(SPK_GATEWAY+'/ipfs/'+hash,{
-                timeout: SPK_GATEWAY_TIMEOUT,
-                decompress: false
-            })
-            return gwFileInfo.status
-        } catch (e) {
-            if (e.response && typeof e.response.status === 'number')
-                return e.response.status
-            return 404
+        } else {
+            try {
+                let gwFileInfo = await axios.head(SPK_GATEWAY+'/ipfs/'+hash,{
+                    timeout: SPK_GATEWAY_TIMEOUT,
+                    decompress: false
+                })
+                return gwFileInfo.status
+            } catch (e) {
+                if (e.response && typeof e.response.status === 'number')
+                    return e.response.status
+                return 404
+            }
         }
     }
 }
 
-const isValidIPFSHash = (hash) => {
-    const base58Pattern = /^[Qm][1-9A-HJ-NP-Za-km-z]{44}$/;
-    const base32Pattern = /^b[1-9A-HJ-NP-Za-km-z]{58}$/;
-    return base58Pattern.test(hash) || base32Pattern.test(hash);
+const parseIPFSHash = (hash) => {
+    let ID = null;
+    try {
+        let IDTemp = CID.parse(hash)
+        ID = IDTemp.toString();
+    } catch (e) {
+        console.log(e.toString())
+    }
+    return ID
 }
 
 export default spk
