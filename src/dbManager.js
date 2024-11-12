@@ -135,9 +135,9 @@ let db = {
     getUsage: (username,network,applyDiscounts = false) => {
         let result = {}
         let userHashes = db.getHashesByUser(possibleTypes,username,network)
-        for (hashtype in userHashes) {
+        for (let hashtype in userHashes) {
             result[hashtype] = 0
-            for (h in userHashes[hashtype]) {
+            for (let h in userHashes[hashtype]) {
                 if (hashInfo[userHashes[hashtype][h]] && typeof hashInfo[userHashes[hashtype][h]].size === 'number') {
                     let discountFactor = applyDiscounts ? (typeof hashInfo[userHashes[hashtype][h]].discount === 'string' ? config.Discounts[hashInfo[userHashes[hashtype][h]].discount] || 1 : 1) : 1
                     result[hashtype] += Math.ceil(hashInfo[userHashes[hashtype][h]].size * discountFactor)
@@ -149,7 +149,7 @@ let db = {
     getTotalUsage: (username,network,applyDiscounts = false) => {
         let usageDet = db.getUsage(username,network,applyDiscounts)
         let qtotal = 0
-        for (det in usageDet) {
+        for (let det in usageDet) {
             qtotal += usageDet[det]
         }
         return qtotal
