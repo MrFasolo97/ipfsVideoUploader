@@ -162,9 +162,11 @@ let auth = {
         }
     },
     authenticateTus: (bearer,needscredits,cb) => {
+        /*
         let bearerAuth = auth.authenticateBearer(bearer)
         if (bearerAuth.error)
             return cb(bearerAuth.error)
+        */
         auth.authenticate(bearerAuth.token,bearerAuth.kc,needscredits,cb)
     },
     decryptMessage: (message,cb) => {
