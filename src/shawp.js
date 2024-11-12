@@ -146,12 +146,12 @@ let Shawp = {
     },
     ValidatePayment: async (receiver,memo) => {
         let network = 'all'
-        if (memo !== '' && !memo.startsWith('to: @') && !memo.startsWith('to: hive@')) return [] // Memo must be empty or begin with "to: @" or "to: network@"
-        if (memo && memo.startsWith('to: @')) {
-            let otheruser = memo.replace('to: @','')
+        if (await memo !== '' && ! await memo.startsWith('to: @') && ! await memo.startsWith('to: hive@')) return [] // Memo must be empty or begin with "to: @" or "to: network@"
+        if (await memo && await memo.startsWith('to: @')) {
+            let otheruser = await memo.replace('to: @','')
             if ((await import('./authManager.js')).default.invalidHiveUsername(otheruser) === null) receiver = otheruser
         } else if (memo && memo.startsWith('to: hive@')) {
-            let otheruser = memo.replace('to: hive@','')
+            let otheruser = await memo.replace('to: hive@','')
             if ((await import('./authManager.js')).default.invalidHiveUsername(otheruser) == null) receiver = otheruser
             network = 'hive'
         }
