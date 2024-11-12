@@ -927,7 +927,7 @@ let uploadOps = {
             // Clear sockets from register after x minutes if results not returned
             setInterval(() => {
                 let currentTime = new Date().getTime()
-                for (ids in socketRegister) {
+                for (let ids in socketRegister) {
                     if (Math.abs(socketRegister[ids].ts - currentTime) > Config.socketTimeout) delete socketRegister[ids]
                 }
             },60000)
