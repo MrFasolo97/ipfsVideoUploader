@@ -311,14 +311,8 @@ let uploadOps = {
     },
     encoderQueue,
     handleTusUpload: async (json,user,network,callback) => {
-        let ID = null;
-        try {
-            ID = CID.parse(json.Upload.ID)
-            ID = ID.toString();
-        } catch (e) {
-            console.log(e.toString())
-            return
-        }
+        let ID = json.Upload.ID; //tus upload ID
+
         json.Upload.MetaData.output = sanitize(json.Upload.MetaData.output)
         json.Upload.MetaData.idx = sanitize(json.Upload.MetaData.idx)
         switch (json.Upload.MetaData.type) {
@@ -396,7 +390,7 @@ let uploadOps = {
                             return emitToUID(ID,'error',{ error: 'Uploaded file exceeds max size allowed by chosen encoder' })
                         uploadOps.remoteEncoderPushJob(json.Upload.MetaData.encoder,ID,user,network,duration,json.Upload.MetaData.createSprite,json.Upload.MetaData.thumbnailFname)
                         if (encoderRegister[json.Upload.MetaData.encoder].queue.length === 1)
-                            encoderRegister[json.Upload.MetaData.encoder].socket.emit('job', remotejob)
+                            encoderRegister[json.Upload.MetaData.encoder].socket.emit('job', {id: })
                         return
                     }
 
