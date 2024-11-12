@@ -169,7 +169,8 @@ app.post('/uploadChunk', authLimiter, bodyParser.json({ verify: rawBodySaver }),
 
 app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),bodyParser.urlencoded({ verify: rawBodySaver, extended: true }),bodyParser.raw({ verify: rawBodySaver, type: '*/*' }),(request,response) => {
     if (!request.body || !request.body.HTTPRequest || !request.body.HTTPRequest.Header)
-        return response.status(400).send({ error: 'Bad request' })
+        //return response.status(400).send({ error: 'Bad request' })
+        return response.send({})
     else if (!Array.isArray(request.body.HTTPRequest.Header.Authorization) || request.body.HTTPRequest.Header.Authorization.length === 0)
         return response.status(400).send({ error: 'Missing auth headers' })
     let authHeader = request.body.HTTPRequest.Header.Authorization[0].split(' ')
