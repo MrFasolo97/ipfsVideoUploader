@@ -168,7 +168,7 @@ app.post('/uploadChunk', authLimiter, bodyParser.json({ verify: rawBodySaver }),
 })
 
 app.post('/uploadVideoResumable', authLimiter, bodyParser.json({ verify: rawBodySaver }),bodyParser.urlencoded({ verify: rawBodySaver, extended: true }),bodyParser.raw({ verify: rawBodySaver, type: '*/*' }),(request,response) => {
-    const authHeaderText = request.body.Event.HTTPRequest.header.Authorization
+    const authHeaderText = request.body.Event.HTTPRequest.Header.Authorization
     if (!authHeaderText)
         return response.status(400).send({ error: 'Bad request' })
     else if (!authHeaderText || authHeaderText.length === 0)
