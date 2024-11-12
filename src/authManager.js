@@ -6,7 +6,7 @@ import * as fs from 'node:fs'
 import { EOL } from 'node:os';
 import * as Shawp from './shawp.js';
 import * as HivecryptPro from './hivecryptPro.js'
-const { CryptoJS: Crypto } = pkg;
+const Crypto = pkg;
 const Config = JSON.parse(fs.readFileSync("./config.json"))
 const dir = process.env.ONELOVEIPFS_DATA_DIR || (await import('os')).default.homedir() + '/.oneloveipfs'
 
