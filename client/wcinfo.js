@@ -95,31 +95,33 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('refillSubmitBtn').value = 'Loading...'
         document.getElementById('refillSubmitBtn').disabled = true
         let nativePymtProcessors = ['HIVE','HBD','BLURT']
-        if (nativePymtProcessors.includes(paymentMethod)) exchageRate(paymentMethod,creditsToBuy,(e,amt) => {
-            document.getElementById('refillSubmitBtn').value = 'Refill'
-            document.getElementById('refillSubmitBtn').disabled = false
-            if (e) return alert(e)
-            amt = amt.toFixed(3)
-            document.getElementById('gbdaysconfirm').innerText = 'Credits: ' + creditsToBuy + ' GBdays'
-            document.getElementById('quoteAmt').innerText = 'Amount: ' + amt + ' ' + paymentMethod
-            updateDisplayByIDs(['nativeDisclaimer'],[])
+        if (nativePymtProcessors.includes(paymentMethod)) {
+            exchageRate(paymentMethod,creditsToBuy,(e,amt) => {
+                document.getElementById('refillSubmitBtn').value = 'Refill'
+                document.getElementById('refillSubmitBtn').disabled = false
+                if (e) return alert(e)
+                amt = amt.toFixed(3)
+                document.getElementById('gbdaysconfirm').innerText = 'Credits: ' + creditsToBuy + ' GBdays'
+                document.getElementById('quoteAmt').innerText = 'Amount: ' + amt + ' ' + paymentMethod
+                updateDisplayByIDs(['nativeDisclaimer'],[])
 
-            let memo = currentnetwork === 'all' ? ('to: @' + username) : ('to: ' + currentnetwork + '@' + username)
-            document.getElementById('xferMemo').innerHTML = 'Memo: <u>' + memo + '</u> <a onclick="copyToClipboard(\''+ memo + '\',\'copymemo\')"><i class="fas fa-clipboard tooltip" id="copybtn"><span class="tooltiptext" id="copymemo">Click to copy</span></i></a>'
+                let memo = currentnetwork === 'all' ? ('to: @' + username) : ('to: ' + currentnetwork + '@' + username)
+                document.getElementById('xferMemo').innerHTML = 'Memo: <u>' + memo + '</u> <a onclick="copyToClipboard(\''+ memo + '\',\'copymemo\')"><i class="fas fa-clipboard tooltip" id="copybtn"><span class="tooltiptext" id="copymemo">Click to copy</span></i></a>'
 
-            switch (paymentMethod) {
-                case 'HIVE':
-                case 'HBD':
-                    hivePaymentClickListener(username,shawpconfig.HiveReceiver,amt,paymentMethod,memo,'refill')
-                    break
-                case 'BLURT':
-                    blurtPaymentClickListener(username,shawpconfig.BlurtReceiver,amt,paymentMethod,memo,'refill')
-                    break
-                default:
-                    break
-            }
-            displayPopup('refillPopup')
-        })
+                switch (paymentMethod) {
+                    case 'HIVE':
+                    case 'HBD':
+                        hivePaymentClickListener(username,shawpconfig.HiveReceiver,amt,paymentMethod,memo,'refill')
+                        break
+                    case 'BLURT':
+                        blurtPaymentClickListener(username,shawpconfig.BlurtReceiver,amt,paymentMethod,memo,'refill')
+                        break
+                    default:
+                        break
+                }
+                displayPopup('refillPopup')
+            })
+        }
     }
 })
 
