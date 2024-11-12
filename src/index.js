@@ -13,9 +13,9 @@ import bodyParser from 'body-parser'
 
 const app = await new express()
 app.set('trust proxy', 1)
-const http = await (await import('http')).Server(app)
+const http = (await import('http')).Server(app)
 
-FileUploader.IPSync.init(http)
+FileUploader.IPSync.init(await http)
 Shawp.init()
 Auth.loadKeys()
 Auth.watch()
@@ -168,22 +168,18 @@ app.post('/uploadChunk', authLimiter, bodyParser.json({ verify: rawBodySaver }),
 })
 
 app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),bodyParser.urlencoded({ verify: rawBodySaver, extended: true }),bodyParser.raw({ verify: rawBodySaver, type: '*/*' }),(request,response) => {
-    const authHeaderText = request.body.Event.HTTPRequest.Header.Authorization
-    if (!authHeaderText)
+    if (!request.body || !request.body.HTTPRequest || !request.body.HTTPRequest.Header)
         return response.status(400).send({ error: 'Bad request' })
-    else if (!authHeaderText || authHeaderText.length === 0)
+    else if (!Array.isArray(request.body.HTTPRequest.Header.Authorization) || request.body.HTTPRequest.Header.Authorization.length === 0)
         return response.status(400).send({ error: 'Missing auth headers' })
-    let authHeader = authHeaderText[0].split(" ")
+    let authHeader = request.body.HTTPRequest.Header.Authorization[0].split(' ')
     if (authHeader.length < 2 || authHeader[0] !== 'Bearer')
         return response.status(400).send({ error: 'Auth header must be a bearer' })
-    if (request.ip !== "127.0.0.1" || authHeader[1].length == 0 || authHeader[1] == null)
-        return response.status(400).send({ error: 'Bad request' })
-    
+
     Auth.authenticateTus(authHeader[1],true,(e,user,network) => {
         if (e) return response.status(401).send({error: e})
         if (request.body.Upload && request.body.Upload.IsPartial)
-            return response.status(200).send({})
-
+            return response.status(200).send()
         switch (request.headers['hook-name']) {
             case "pre-create":
                 // Upload type check
