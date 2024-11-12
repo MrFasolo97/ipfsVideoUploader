@@ -469,7 +469,7 @@ function uploadVideo(resolution,next) {
     progressbarInner.innerHTML = 'Uploading... (0%)'
 
     let videoUpload = new tus.Upload(videoToUpload[0], {
-        endpoint: config.tusdEndpoint.replace("http://", "https://"),
+        endpoint: config.tusdEndpoint,
         retryDelays: [0,3000,5000,10000,20000],
         parallelUploads: getMobileOperatingSystem() === 'iOS' ? 1 : (parseInt(usersettings.uplThreads) || 10),
         headers: {
@@ -620,7 +620,7 @@ function selfEncodeUpload(encodeId,uploadId,outputs) {
         token: window.btoa(JSON.stringify({keychain: Auth.iskeychain === 'true'})).replace(/={1,2}$/, '')+'.'+Auth.token,
         threads: parseInt(usersettings.uplThreads) || 10,
         outputs: outputs,
-        endpoint: config.tusdEndpoint.replace("http://", "https://")
+        endpoint: config.tusdEndpoint
     }})
     let uploadResultChannel = new BroadcastChannel('self_encode_upload_result')
     uploadResultChannel.onmessage = async evt => {
