@@ -170,7 +170,8 @@ app.post('/uploadChunk', authLimiter, bodyParser.json({ verify: rawBodySaver }),
 app.post('/uploadVideoResumable', authLimiter, bodyParser.json({ verify: rawBodySaver }),bodyParser.urlencoded({ verify: rawBodySaver, extended: true }),(request,response) => {
     if (request.ip !== "127.0.0.1")
         return response.status(400).send({ error: 'Bad request' })
-    Auth.authenticateTus(authHeader[1],true,(e,user,network) => {
+    const bearer = null
+    Auth.authenticateTus(bearer,true,(e,user,network) => {
         if (e) return response.status(401).send({error: e})
         if (request.body.Upload.IsPartial)
             return response.status(200).send()
