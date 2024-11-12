@@ -284,7 +284,7 @@ function postpublish() {
             du = username
             dp = postparams.permlink
         }
-        document.getElementById('postpublishwatchDTube').onclick = () => window.open('https://d.tube/#!/v/'+du+'/'+dp)
+        document.getElementById('postpublishwatchDTube').onclick = () => window.open('https://dtube.app/#!/v/'+du+'/'+dp)
         document.getElementById('postpublishembedDTube').onclick = () => copyToClipboard(pfPlayerEmbed('DTube'),'postpublishembedttDTube')
     }
 }
@@ -300,7 +300,7 @@ function postpublishshare(dest) {
         case 'None':
             return alert('Please select a target video platform to share links')
         case 'DTube':
-            tgurl = 'https://d.tube/#!/v/'+(av ? av : username)+'/'+(av ? generateAvalonLinkFromIpfsHash(postparams.ipfshash) : postparams.permlink)
+            tgurl = 'https://dtube.app/#!/v/'+(av ? av : username)+'/'+(av ? generateAvalonLinkFromIpfsHash(postparams.ipfshash) : postparams.permlink)
             break
         case '3Speak':
             tgurl = 'https://3speak.tv/watch?v='+usernameByNetwork('hive')+'/'+postparams.permlink

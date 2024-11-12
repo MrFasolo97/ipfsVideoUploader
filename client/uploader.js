@@ -860,7 +860,7 @@ function postThumbnailByPlatform(network) {
         case '3Speak':
             return '<center>[![](https://ipfs-3speak.b-cdn.net/ipfs/'+postparams.imghash+')](https://3speak.tv/watch?v='+usernameByNetwork(network)+'/'+postparams.permlink+')</center><hr>'
         case 'DTube':
-            return '<center><a href=\'https://d.tube/#!/v/'+usernameByNetwork(network)+'/'+postparams.permlink+'\'><img src=\''+getPreferredIPFSGw(true)+'/ipfs/'+postparams.imghash+'\'></a></center><hr>'
+            return '<center><a href=\'https://dtube.app/#!/v/'+usernameByNetwork(network)+'/'+postparams.permlink+'\'><img src=\''+getPreferredIPFSGw(true)+'/ipfs/'+postparams.imghash+'\'></a></center><hr>'
     }
 }
 
@@ -871,7 +871,7 @@ function buildPostBody(network) {
     if (isPlatformSelected['3Speak'])
         result += '\n[▶️ 3Speak](https://3speak.tv/watch?v='+usernameByNetwork(network)+'/'+postparams.permlink+')'
     if (isPlatformSelected['DTube'])
-        result += '\n[▶️ DTube](https://d.tube/#!/v/'+usernameByNetwork(network)+'/'+postparams.permlink+')'
+        result += '\n[▶️ DTube](https://dtube.app/#!/v/'+usernameByNetwork(network)+'/'+postparams.permlink+')'
     result += '\n[▶️ IPFS]('+getPreferredIPFSGw(true)+'/ipfs/'+postparams.ipfshash+')'
     if (postparams.skylink)
         result += '\n[▶️ Skynet](https://siasky.net/'+postparams.skylink+')'
