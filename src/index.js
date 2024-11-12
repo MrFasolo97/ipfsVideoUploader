@@ -12,6 +12,7 @@ const fs = await import('fs')
 import bodyParser from 'body-parser'
 
 const app = await new express()
+app.set('trust proxy', 1)
 const http = await (await import('http')).Server(app)
 
 FileUploader.IPSync.init(http)
