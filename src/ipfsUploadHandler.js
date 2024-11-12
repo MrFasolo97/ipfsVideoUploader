@@ -866,7 +866,7 @@ let uploadOps = {
                     usercount--
 
                     // Unregister socket from upload ID
-                    for (upls in socketRegister) {
+                    for (let upls in socketRegister) {
                         if (socketRegister[upls].socket == socket) {
                             delete socketRegister[upls]
                         }
