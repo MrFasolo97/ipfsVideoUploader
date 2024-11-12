@@ -406,11 +406,6 @@ let uploadOps = {
                         return emitToUID(ID,'error',{ error: 'Uploaded file exceeds max size allowed by server encoder' })
 
                     let outputResolutions = helpers.determineOutputs(width,height,Config.Encoder.outputs)
-                    let filePath = fs.realpathSync(defaultDir+"/"+ID);
-                    // Security check against path traversal. Maybe warn the admin?
-                    if (!filePath.startsWith(defaultDir)) {
-                        return callback();
-                    }
                     // Create folders
                     fs.mkdirSync(filePath)
                     for (let r in outputResolutions)
