@@ -144,28 +144,28 @@ let Shawp = {
             result += 'UNKNOWN'
         return result
     },
-    ValidatePayment: (receiver,memo) => {
+    ValidatePayment: async (receiver,memo) => {
         let network = 'all'
         if (memo !== '' && !memo.startsWith('to: @') && !memo.startsWith('to: hive@')) return [] // Memo must be empty or begin with "to: @" or "to: network@"
         if (memo && memo.startsWith('to: @')) {
             let otheruser = memo.replace('to: @','')
-            if (import('./authManager.js').invalidHiveUsername(otheruser) === null) receiver = otheruser
+            if ((await import('./authManager.js')).default.invalidHiveUsername(otheruser) === null) receiver = otheruser
         } else if (memo && memo.startsWith('to: hive@')) {
             let otheruser = memo.replace('to: hive@','')
-            if (import('./authManager.js').invalidHiveUsername(otheruser) == null) receiver = otheruser
+            if ((await import('./authManager.js')).default.invalidHiveUsername(otheruser) == null) receiver = otheruser
             network = 'hive'
         }
         return [receiver,network]
     },
-    AddUser: (username,network,nowrite) => {
-        let fullusername = db.toFullUsername(username,network,true)
+    AddUser: async (username,network,nowrite) => {
+        let fullusername = await db.toFullUsername(username,network,true)
         if (Customers[fullusername]) return
         Customers[fullusername] = {
             rate: Config.Shawp.DefaultUSDRate,
             balance: 0,
             joinedSince: new Date().getTime()
         }
-        import('./authManager.js').whitelistAdd(username,network,() => {},nowrite)
+        (await import('./authManager.js')).default.whitelistAdd(username,network,() => {},nowrite)
     },
     User: (username,network) => {
         let fullusername = db.toFullUsername(username,network,true)
