@@ -149,10 +149,10 @@ let Shawp = {
         if (memo !== '' && !memo.startsWith('to: @') && !memo.startsWith('to: hive@')) return [] // Memo must be empty or begin with "to: @" or "to: network@"
         if (memo && memo.startsWith('to: @')) {
             let otheruser = memo.replace('to: @','')
-            if (import('./authManager').invalidHiveUsername(otheruser) === null) receiver = otheruser
+            if (import('./authManager.js').invalidHiveUsername(otheruser) === null) receiver = otheruser
         } else if (memo && memo.startsWith('to: hive@')) {
             let otheruser = memo.replace('to: hive@','')
-            if (import('./authManager').invalidHiveUsername(otheruser) == null) receiver = otheruser
+            if (import('./authManager.js').invalidHiveUsername(otheruser) == null) receiver = otheruser
             network = 'hive'
         }
         return [receiver,network]
@@ -165,7 +165,7 @@ let Shawp = {
             balance: 0,
             joinedSince: new Date().getTime()
         }
-        import('./authManager').whitelistAdd(username,network,() => {},nowrite)
+        import('./authManager.js').whitelistAdd(username,network,() => {},nowrite)
     },
     User: (username,network) => {
         let fullusername = db.toFullUsername(username,network,true)
