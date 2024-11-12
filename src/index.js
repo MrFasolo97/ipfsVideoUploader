@@ -173,7 +173,7 @@ app.post('/uploadVideoResumable', authLimiter, bodyParser.json({ verify: rawBody
         return response.status(400).send({ error: 'Bad request' })
     else if (!authHeaderText || authHeaderText.length === 0)
         return response.status(400).send({ error: 'Missing auth headers' })
-    let authHeader = authHeaderText.split(' ')
+    let authHeader = authHeaderText[0].split(" ")
     if (authHeader.length < 2 || authHeader[0] !== 'Bearer')
         return response.status(400).send({ error: 'Auth header must be a bearer' })
     if (request.ip !== "127.0.0.1" || authHeader[1].length == 0 || authHeader[1] == null)
