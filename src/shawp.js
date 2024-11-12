@@ -161,15 +161,15 @@ let Shawp = {
         }
         return [receiver,network]
     },
-    AddUser: async (username,network,nowrite) => {
-        let fullusername = await db.toFullUsername(username,network,true)
+    AddUser: (username,network,nowrite) => {
+        let fullusername = db.toFullUsername(username,network,true)
         if (Customers[fullusername]) return
         Customers[fullusername] = {
             rate: Config.Shawp.DefaultUSDRate,
             balance: 0,
             joinedSince: new Date().getTime()
         }
-        (await import('./authManager.js')).default.whitelistAdd(username,network,() => {},nowrite)
+        import('./authManager.js').then((value) => value.default.whitelistAdd(username,network,() => {},nowrite))
     },
     User: (username,network) => {
         let fullusername = db.toFullUsername(username,network,true)
