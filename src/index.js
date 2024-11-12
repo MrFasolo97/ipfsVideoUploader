@@ -167,12 +167,19 @@ app.post('/uploadChunk', authLimiter, bodyParser.json({ verify: rawBodySaver }),
     Authenticate(request,response,true,(user,network) => FileUploader.uploadChunk(user,network,request,response))
 })
 
-app.post('/uploadVideoResumable', authLimiter, bodyParser.json({ verify: rawBodySaver }),bodyParser.urlencoded({ verify: rawBodySaver, extended: true }),(request,response) => {
-    const bearer = request.get("authorization").split(" ")[1]
-    if (request.ip !== "127.0.0.1" || !bearer)
+app.post('/uploadVideoResumable', authLimiter, bodyParser.json({ verify: rawBodySaver }),bodyParser.urlencoded({ verify: rawBodySaver, extended: true }),bodyParser.raw({ verify: rawBodySaver, type: '*/*' }),(request,response) => {
+    const authHeaderText = request.get("authorization") || request.headers["Authorization"] || request.headers["authorization"]
+    if (!authHeaderText)
+        return response.status(400).send({ error: 'Bad request' })
+    else if (!authHeaderText || authHeaderText.length === 0)
+        return response.status(400).send({ error: 'Missing auth headers' })
+    let authHeader = authHeaderText.split(' ')
+    if (authHeader.length < 2 || authHeader[0] !== 'Bearer')
+        return response.status(400).send({ error: 'Auth header must be a bearer' })
+    if (request.ip !== "127.0.0.1" || authHeader[1].length == 0 || authHeader[1] == null)
         return response.status(400).send({ error: 'Bad request' })
     
-    Auth.authenticateTus(bearer,true,(e,user,network) => {
+    Auth.authenticateTus(authHeader[1],true,(e,user,network) => {
         if (e) return response.status(401).send({error: e})
         if (request.body.Upload.IsPartial)
             return response.status(200).send()
