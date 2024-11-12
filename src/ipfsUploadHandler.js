@@ -200,10 +200,10 @@ let uploadOps = {
     isIPFSOnline: async () => {
         try {
             for await (const i of ipfsAPI.stats.bw()) {}
+            return true
         } catch {
             return false
         }
-        return true
     },
     uploadImage: (username,network,request,response) => {
         let imgType = request.query.type
@@ -311,8 +311,11 @@ let uploadOps = {
     },
     encoderQueue,
     handleTusUpload: async (json,user,network,callback) => {
-        let filepath = json.Upload.Storage.Path
         const SAFE_ROOT = Config.tusdUploadDir; // Define a safe root directory
+        let filepath = path.resolve(json.Upload.Storage.Path);
+        if (!filepath.startsWith(SAFE_ROOT)) {
+            return callback(new Error('Invalid file path'));
+        }
         let ID = null;
         try {
             ID = CID.parse(json.Upload.ID)
@@ -327,10 +330,6 @@ let uploadOps = {
             case 'hlsencode':
                 // create folders if not exist
                 const workingDir = path.resolve(SAFE_ROOT, json.Upload.MetaData.encodeID);
-                let filepath = path.resolve(SAFE_ROOT, json.Upload.Storage.Path);
-                if (!filepath.startsWith(SAFE_ROOT)) {
-                    return callback(new Error('Invalid file path'));
-                }
                 if (!workingDir.startsWith(SAFE_ROOT)) {
                     return callback(new Error('Invalid directory path'));
                 }
