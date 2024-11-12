@@ -311,11 +311,6 @@ let uploadOps = {
     },
     encoderQueue,
     handleTusUpload: async (json,user,network,callback) => {
-        const SAFE_ROOT = Config.tusdUploadDir; // Define a safe root directory
-        let filepath = path.resolve(json.Upload.Storage.Path);
-        if (!filepath.startsWith(SAFE_ROOT)) {
-            return callback(new Error('Invalid file path'));
-        }
         let ID = null;
         try {
             ID = CID.parse(json.Upload.ID)
@@ -329,10 +324,7 @@ let uploadOps = {
         switch (json.Upload.MetaData.type) {
             case 'hlsencode':
                 // create folders if not exist
-                const workingDir = path.resolve(SAFE_ROOT, json.Upload.MetaData.encodeID);
-                if (!workingDir.startsWith(SAFE_ROOT)) {
-                    return callback(new Error('Invalid directory path'));
-                }
+                const workingDir = json.Upload.MetaData.encodeID;
                 if (!fs.existsSync(workingDir))
                     fs.mkdirSync(workingDir)
                 if (json.Upload.MetaData.output !== 'sprite') {
@@ -366,10 +358,7 @@ let uploadOps = {
                     else
                         // error if duplicate sprite uploads
                         if (!json.Upload.MetaData.selfEncode && encoderRegister[db.toFullUsername(user,network)] && encoderRegister[db.toFullUsername(user,network)].socket) {
-                            let filepath = path.resolve(SAFE_ROOT, json.Upload.Storage.Path);
-                            if (!filepath.startsWith(SAFE_ROOT)) {
-                                return callback(new Error('Invalid file path'));
-                            }
+                            let filepath = json.Upload.Storage.Path;
                             fs.unlinkSync(filepath)
                             encoderRegister[db.toFullUsername(user,network)].socket.emit('error',{
                                 method: 'hlsencode',
@@ -395,7 +384,7 @@ let uploadOps = {
                 callback()
                 break
             case 'hls':
-                helpers.getFFprobeVideo(filepath).then((d) => {
+                await helpers.getFFprobeVideo(filepath).then((d) => {
                     let { width, height, duration, orientation } = d
                     if (!width || !height || !duration || !orientation)
                         return emitToUID(ID,'error',{ error: 'could not retrieve ffprobe info on uploaded video' },false)
@@ -417,7 +406,7 @@ let uploadOps = {
                         return emitToUID(ID,'error',{ error: 'Uploaded file exceeds max size allowed by server encoder' })
 
                     let outputResolutions = helpers.determineOutputs(width,height,Config.Encoder.outputs)
-                    let filePath = fs.realpathSync(path.resolve(defaultDir, ID));
+                    let filePath = fs.realpathSync(defaultDir+"/"+ID);
                     // Security check against path traversal. Maybe warn the admin?
                     if (!filePath.startsWith(defaultDir)) {
                         return callback();
