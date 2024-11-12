@@ -1,5 +1,5 @@
-import { createHelia } from 'helia'
 import { Server } from 'socket.io';
+import { create } from 'kubo-rpc-client'
 const Multer = (await import('multer')).default
 // const Skynet = require('@nebulous/skynet')
 const CID = (await import('multiformats/cid')).default
@@ -85,7 +85,7 @@ const getEncoderBySocket = (socket) => {
     return null
 }
 
-const ipfsAPI = await createHelia({ host: Config.IPFS_HOST, port: Config.IPFS_API_PORT, protocol: Config.IPFS_PROTOCOL })
+const ipfsAPI = await create({url: Config.IPFS_PROTOCOL+"://"+Config.IPFS_HOST+":"+Config.IPFS_API_PORT})
 const globSource = ipfsAPI.globSource
 const streamUpload = Multer({ dest: defaultDir, limits: { fileSize: 52428800 } }) // 50MB segments
 const imgUpload = Multer({ dest: defaultDir, limits: { fileSize: 7340032 } })
@@ -199,7 +199,8 @@ const getDuration = (path) => {
 let uploadOps = {
     isIPFSOnline: async () => {
         try {
-            for await (const i of ipfsAPI.stats.bw()) {}
+
+            for await (const i of ipfsAPI.blockstore.getAll.bw()) {}
         } catch {
             return false
         }
