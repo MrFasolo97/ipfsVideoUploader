@@ -508,7 +508,7 @@ function uploadVideo(resolution,next) {
                 access_token: Auth.token,
                 keychain: Auth.iskeychain
             })
-            if (resolution >= 0)
+            if (resolution <= 0)
                 uploadVideo(resolution+1,next)
             else
                 next()
