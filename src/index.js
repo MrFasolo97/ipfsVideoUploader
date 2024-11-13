@@ -168,7 +168,7 @@ app.post('/uploadChunk', authLimiter, bodyParser.json({ verify: rawBodySaver }),
 })
 
 app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),bodyParser.urlencoded({ verify: rawBodySaver, extended: true }),bodyParser.raw({ verify: rawBodySaver, type: '*/*' }),(request,response) => {
-    if (!request.body || !request.body.HTTPRequest || !request.body.HTTPRequest.Header) {
+    if ((!request.body || !request.body.HTTPRequest || !request.body.HTTPRequest.Header) && request.body.Type != 'pre-create') {
         console.log(request.body)
         return response.status(400).send({ error: 'Bad request' })
     } else if (!Array.isArray(request.body.HTTPRequest.Header.Authorization) || request.body.HTTPRequest.Header.Authorization.length === 0)
