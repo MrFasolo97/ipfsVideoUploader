@@ -315,36 +315,39 @@ let uploadOps = {
         let ID = json.Event.Upload.ID; //tus upload ID
         // console.log(await ID)
         // console.log(await json.MetaData)
-        switch (json.Upload.MetaData.type) {
+        if (typeof json.Event.Upload.MetaData == 'undefined') {
+            return callback()
+        }
+        switch (json.Event.Upload.MetaData.type) {
             case 'hlsencode':
-                json.Upload.MetaData.output = sanitize(json.Upload.MetaData.output)
-                json.Upload.MetaData.idx = sanitize(json.Upload.MetaData.idx)
+                json.Event.Upload.MetaData.output = sanitize(json.Event.Upload.MetaData.output)
+                json.Event.Upload.MetaData.idx = sanitize(json.Event.Upload.MetaData.idx)
                 // create folders if not exist
-                const workingDir = json.Upload.MetaData.encodeID;
+                const workingDir = json.Event.Upload.MetaData.encodeID;
                 if (!fs.existsSync(workingDir))
                     fs.mkdirSync(workingDir)
-                if (json.Upload.MetaData.output !== 'sprite') {
-                    if (!fs.existsSync(workingDir+'/'+json.Upload.MetaData.output+'p'))
-                        fs.mkdirSync(workingDir+'/'+json.Upload.MetaData.output+'p')
+                if (json.Event.Upload.MetaData.output !== 'sprite') {
+                    if (!fs.existsSync(workingDir+'/'+json.Event.Upload.MetaData.output+'p'))
+                        fs.mkdirSync(workingDir+'/'+json.Event.Upload.MetaData.output+'p')
 
                     // move files from tus dir to created folders
-                    if (parseInt(json.Upload.MetaData.idx) >= 0 && !fs.existsSync(workingDir+'/'+json.Upload.MetaData.output+'p/'+json.Upload.MetaData.idx+'.ts'))
-                        fs.renameSync(filepath,workingDir+'/'+json.Upload.MetaData.output+'p/'+json.Upload.MetaData.idx+'.ts')
-                    else if (parseInt(json.Upload.MetaData.idx) === -1 && !fs.existsSync(workingDir+'/'+json.Upload.MetaData.output+'p/index.m3u8'))
+                    if (parseInt(json.Event.Upload.MetaData.idx) >= 0 && !fs.existsSync(workingDir+'/'+json.Event.Upload.MetaData.output+'p/'+json.Event.Upload.MetaData.idx+'.ts'))
+                        fs.renameSync(filepath,workingDir+'/'+json.Event.Upload.MetaData.output+'p/'+json.Event.Upload.MetaData.idx+'.ts')
+                    else if (parseInt(json.Event.Upload.MetaData.idx) === -1 && !fs.existsSync(workingDir+'/'+json.Event.Upload.MetaData.output+'p/index.m3u8'))
                         // index m3u8 file
-                        fs.renameSync(filepath,workingDir+'/'+json.Upload.MetaData.output+'p/index.m3u8')
+                        fs.renameSync(filepath,workingDir+'/'+json.Event.Upload.MetaData.output+'p/index.m3u8')
                     else
                         // error if duplicate output uploads
-                        if (!json.Upload.MetaData.selfEncode && encoderRegister[db.toFullUsername(user,network)] && encoderRegister[db.toFullUsername(user,network)].socket) {
+                        if (!json.Event.Upload.MetaData.selfEncode && encoderRegister[db.toFullUsername(user,network)] && encoderRegister[db.toFullUsername(user,network)].socket) {
                             fs.unlinkSync(filepath)
                             encoderRegister[db.toFullUsername(user,network)].socket.emit('error',{
                                 method: 'hlsencode',
-                                id: json.Upload.MetaData.encodeID,
-                                error: 'duplicate output upload '+json.Upload.MetaData.output+'p idx '+json.Upload.MetaData.idx
+                                id: json.Event.Upload.MetaData.encodeID,
+                                error: 'duplicate output upload '+json.Event.Upload.MetaData.output+'p idx '+json.Event.Upload.MetaData.idx
                             })
                             return callback()
-                        } else if (json.Upload.MetaData.selfEncode)
-                            emitToUID(json.Upload.MetaData.encodeID,'error',{ error: 'duplicate output upload '+json.Upload.MetaData.output+'p idx '+json.Upload.MetaData.idx })
+                        } else if (json.Event.Upload.MetaData.selfEncode)
+                            emitToUID(json.Event.Upload.MetaData.encodeID,'error',{ error: 'duplicate output upload '+json.Event.Upload.MetaData.output+'p idx '+json.Event.Upload.MetaData.idx })
                 } else {
                     if (!filepath.startsWith(workingDir)) {
                         return callback(new Error('Invalid file path'));
@@ -353,30 +356,30 @@ let uploadOps = {
                         fs.renameSync(filepath,workingDir+'/sprite.jpg')
                     else
                         // error if duplicate sprite uploads
-                        if (!json.Upload.MetaData.selfEncode && encoderRegister[db.toFullUsername(user,network)] && encoderRegister[db.toFullUsername(user,network)].socket) {
-                            let filepath = json.Upload.Storage.Path;
+                        if (!json.Event.Upload.MetaData.selfEncode && encoderRegister[db.toFullUsername(user,network)] && encoderRegister[db.toFullUsername(user,network)].socket) {
+                            let filepath = json.Event.Upload.Storage.Path;
                             fs.unlinkSync(filepath)
                             await encoderRegister[db.toFullUsername(user,network)].socket.emit('error',{
                                 method: 'hlsencode',
-                                id: json.Upload.MetaData.encodeID,
+                                id: json.Event.Upload.MetaData.encodeID,
                                 error: 'duplicate sprite upload'
                             })
                             return callback()
-                        } else if (json.Upload.MetaData.selfEncode)
-                            emitToUID(json.Upload.MetaData.encodeID,'error',{ error: 'duplicate sprite upload' })
+                        } else if (json.Event.Upload.MetaData.selfEncode)
+                            emitToUID(json.Event.Upload.MetaData.encodeID,'error',{ error: 'duplicate sprite upload' })
                 }
                 let ack = {
                     method: 'hlsencode',
                     type: 'hlsencode',
-                    id: json.Upload.MetaData.encodeID,
-                    idx: json.Upload.MetaData.idx,
-                    output: json.Upload.MetaData.output,
+                    id: json.Event.Upload.MetaData.encodeID,
+                    idx: json.Event.Upload.MetaData.idx,
+                    output: json.Event.Upload.MetaData.output,
                     success: true
                 }
-                if (!json.Upload.MetaData.selfEncode && encoderRegister[db.toFullUsername(user,network)] && encoderRegister[db.toFullUsername(user,network)].socket)
+                if (!json.Event.Upload.MetaData.selfEncode && encoderRegister[db.toFullUsername(user,network)] && encoderRegister[db.toFullUsername(user,network)].socket)
                     encoderRegister[db.toFullUsername(user,network)].socket.emit('result',ack)
-                else if (json.Upload.MetaData.selfEncode)
-                    emitToUID(json.Upload.MetaData.encodeID,'result',ack,true)
+                else if (json.Event.Upload.MetaData.selfEncode)
+                    emitToUID(json.Event.Upload.MetaData.encodeID,'result',ack,true)
                 callback()
                 break
             case 'hls':
@@ -385,20 +388,20 @@ let uploadOps = {
                     if (!width || !height || !duration || !orientation)
                         return emitToUID(ID,'error',{ error: 'could not retrieve ffprobe info on uploaded video' },false)
 
-                    if (json.Upload.MetaData.encoder) {
-                        if (!encoderRegister[json.Upload.MetaData.encoder])
+                    if (json.Event.Upload.MetaData.encoder) {
+                        if (!encoderRegister[json.Event.Upload.MetaData.encoder])
                             return emitToUID(ID,'error',{ error: 'Encoder is not online' })
-                        if (json.Upload.Size > encoderRegister[json.Upload.MetaData.encoder].maxSize)
+                        if (json.Event.Upload.Size > encoderRegister[json.Event.Upload.MetaData.encoder].maxSize)
                             return emitToUID(ID,'error',{ error: 'Uploaded file exceeds max size allowed by chosen encoder' })
-                        uploadOps.remoteEncoderPushJob(json.Upload.MetaData.encoder,ID,user,network,duration,json.Upload.MetaData.createSprite,json.Upload.MetaData.thumbnailFname)
-                        if (encoderRegister[json.Upload.MetaData.encoder].queue.length === 1)
-                            remoteEncoderNext(json.Upload.MetaData.encoder)
+                        uploadOps.remoteEncoderPushJob(json.Event.Upload.MetaData.encoder,ID,user,network,duration,json.Event.Upload.MetaData.createSprite,json.Event.Upload.MetaData.thumbnailFname)
+                        if (encoderRegister[json.Event.Upload.MetaData.encoder].queue.length === 1)
+                            remoteEncoderNext(json.Event.Upload.MetaData.encoder)
                         return
                     }
 
                     if (Config.Encoder.outputs.length === 0)
                         return emitToUID(ID,'error',{ error: 'Server encoder is disabled' })
-                    else if (Config.Encoder.maxSizeMb && json.Upload.Size > Config.Encoder.maxSizeMb*MB)
+                    else if (Config.Encoder.maxSizeMb && json.Event.Upload.Size > Config.Encoder.maxSizeMb*MB)
                         return emitToUID(ID,'error',{ error: 'Uploaded file exceeds max size allowed by server encoder' })
 
                     let outputResolutions = helpers.determineOutputs(width,height,Config.Encoder.outputs)
@@ -415,7 +418,7 @@ let uploadOps = {
                         Config.Encoder.encoder,
                         Config.Encoder.quality,
                         outputResolutions,
-                        Config.spritesEnabled && json.Upload.MetaData.createSprite,
+                        Config.spritesEnabled && json.Event.Upload.MetaData.createSprite,
                         filePath,
                         Config.Encoder.threads,
                         (id, resolution, p) => {
@@ -450,7 +453,7 @@ let uploadOps = {
                                 emitToUID(ID,'error',{ error: masterPlaylist.error },false)
                                 return nextJob()
                             }
-                            let hasThumbnail = helpers.hlsThumbnail(json.Upload.MetaData.thumbnailFname,filePath,filePath+'/'+ID)
+                            let hasThumbnail = helpers.hlsThumbnail(json.Event.Upload.MetaData.thumbnailFname,filePath,filePath+'/'+ID)
 
                             s.step = 'ipfsadd'
                             emitToUID(ID,'begin',s,true)
@@ -526,7 +529,7 @@ let uploadOps = {
                 }
                 let ipfsops = {
                     videohash: (cb) => {
-                        addFile(filepath,true,Config.Skynet.enabled && json.Upload.MetaData.skynet == 'true',(size,hash,skylink) => cb(null,{ipfshash: hash, skylink: skylink, size: size}))
+                        addFile(filepath,true,Config.Skynet.enabled && json.Event.Upload.MetaData.skynet == 'true',(size,hash,skylink) => cb(null,{ipfshash: hash, skylink: skylink, size: size}))
                     },
                     spritehash: (cb) => {
                         addSprite(filepath,ID).then(r=>cb(null,r))
@@ -536,7 +539,7 @@ let uploadOps = {
                 async.parallel(ipfsops, async (errors,results) => {
                     if (errors) console.log(errors)
                     console.log(results)
-                    db.recordHash(user,network,'videos',results.videohash.ipfshash,json.Upload.Size)
+                    db.recordHash(user,network,'videos',results.videohash.ipfshash,json.Event.Upload.Size)
                     if (results.spritehash.success)
                         db.recordHash(user,network,'sprites',results.spritehash.hash,results.spritehash.size)
                     db.writeHashesData()
@@ -554,7 +557,7 @@ let uploadOps = {
                         ipfshash: results.videohash.ipfshash,
                         spritehash: results.spritehash.hash || null,
                         skylink: results.videohash.skylink,
-                        filesize: json.Upload.Size
+                        filesize: json.Event.Upload.Size
                     }
 
                     if (Config.durationAPIEnabled)
@@ -579,13 +582,13 @@ let uploadOps = {
                     callback()
                     return
                 }
-                await addFile(filepath,true,Config.Skynet.enabled && json.Upload.MetaData.skynet == 'true',(size,hash,skylink) => {
-                    db.recordHash(user,network,json.Upload.MetaData.type,hash,json.Upload.Size)
+                await addFile(filepath,true,Config.Skynet.enabled && json.Event.Upload.MetaData.skynet == 'true',(size,hash,skylink) => {
+                    db.recordHash(user,network,json.Event.Upload.MetaData.type,hash,json.Event.Upload.Size)
                     db.writeHashesData()
                     db.writeHashInfoData()
 
                     if (skylink) {
-                        db.recordSkylink(user,network,json.Upload.MetaData.type,skylink)
+                        db.recordSkylink(user,network,json.Event.Upload.MetaData.type,skylink)
                         db.writeSkylinksData()
                     }
 
@@ -594,7 +597,7 @@ let uploadOps = {
                     let result = { 
                         username: user,
                         network: network,
-                        type: json.Upload.MetaData.type,
+                        type: json.Event.Upload.MetaData.type,
                         hash: hash,
                         skylink: skylink
                     }
