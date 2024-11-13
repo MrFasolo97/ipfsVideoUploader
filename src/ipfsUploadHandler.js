@@ -143,7 +143,7 @@ const skynetAdd = (path,opts) => {
 const addSprite = async (filepath,id) => {
     return new Promise((rs,rj) => {
         if (!Config.spritesEnabled) return rs({})
-        Shell.exec(__dirname+'/../scripts/dtube-sprite.sh ' + filepath + ' ' + defaultDir + '/' + id + '.jpg',(exitCode) => {
+        Shell.exec(import.meta.dirname+'/../scripts/dtube-sprite.sh ' + filepath + ' ' + defaultDir + '/' + id + '.jpg',(exitCode) => {
             if (exitCode === 0)
                 addFile(defaultDir+'/'+id + '.jpg',true,false,(size,hash) => rs({success: true, size: size, hash: hash}))
             else

@@ -10,6 +10,14 @@ const Auth = (await import('./authManager.js')).default
 const Shawp = (await import('./shawp.js')).default
 const fs = await import('fs')
 import bodyParser from 'body-parser'
+const [major, minor, patch] = process.versions.node.split('.').map(Number)
+
+if(major < 20) {
+    console.log("Mininmum supported node version is 20.x.y")
+    process.exit(-1)
+} else {
+    console.log("Correctly using node version", major+"."+minor+"."+patch)
+}
 
 const app = await new express()
 app.set('trust proxy', 1)
