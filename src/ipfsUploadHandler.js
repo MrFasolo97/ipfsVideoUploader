@@ -311,7 +311,8 @@ let uploadOps = {
     },
     encoderQueue,
     handleTusUpload: async (json,user,network,callback) => {
-        let ID = json.MetaData.ID; //tus upload ID
+        let ID = json.MetaData.id; //tus upload ID
+        console.log(json)
         console.log(await ID)
         console.log(await json.MetaData)
         json.Upload.MetaData.output = sanitize(json.Upload.MetaData.output)
