@@ -311,8 +311,9 @@ let uploadOps = {
     },
     encoderQueue,
     handleTusUpload: async (json,user,network,callback) => {
-        let filepath = json.Upload.Storage.Path
-        switch (json.Upload.MetaData.type) {
+        let filepath = await json.Upload.Storage.Path
+        console.log(await json.Upload.MetaData.type)
+        switch (await json.Upload.MetaData.type) {
             case 'hlsencode':
                 // create folders if not exist
                 const workingDir = defaultDir+'/'+json.Upload.MetaData.encodeID
