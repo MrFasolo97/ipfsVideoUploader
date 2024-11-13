@@ -173,11 +173,15 @@ app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),body
             console.log(request.body)
             console.log("Sending status code 400:", { error: 'Bad request' })
             return response.status(400).send({ error: 'Bad request' })
-        } else if (!Array.isArray(request.body.Event.HTTPRequest.Header.Authorization) || request.body.Event.HTTPRequest.Header.Authorization.length === 0)
+        } else if (!Array.isArray(request.body.Event.HTTPRequest.Header.Authorization) || request.body.Event.HTTPRequest.Header.Authorization.length === 0) {
+            console.log("Missing auth headers")
             return response.status(400).send({ error: 'Missing auth headers' })
+        }
         let authHeader = request.body.Event.HTTPRequest.Header.Authorization[0].split(' ')
-        if (authHeader.length < 2 || authHeader[0] !== 'Bearer')
+        if (authHeader.length < 2 || authHeader[0] !== 'Bearer') {
+            console.log("Error: Auth header must be a bearer")
             return response.status(400).send({ error: 'Auth header must be a bearer' })
+        }
         Auth.authenticateTus(authHeader[1],true,(e,user,network) => {
             if (e) return response.status(401).send({error: e})
             if (request.body.Event.Upload && request.body.Event.Upload.IsPartial)
