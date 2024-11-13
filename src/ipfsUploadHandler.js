@@ -396,7 +396,7 @@ let uploadOps = {
                             return emitToUID(ID,'error',{ error: 'Uploaded file exceeds max size allowed by chosen encoder' })
                         uploadOps.remoteEncoderPushJob(json.Event.Upload.MetaData.encoder,ID,user,network,duration,json.Event.Upload.MetaData.createSprite,json.Event.Upload.MetaData.thumbnailFname)
                         if (encoderRegister[json.Event.Upload.MetaData.encoder].queue.length === 1)
-                            remoteEncoderNext(json.Event.Upload.MetaData.encoder)
+                            encoderRegister[json.Upload.MetaData.encoder].socket.emit('job', remotejob)
                         return
                     }
 
@@ -529,8 +529,8 @@ let uploadOps = {
                     return
                 }
                 let ipfsops = {
-                    videohash: (cb) => {
-                        addFile(filepath,true,Config.Skynet.enabled && json.Event.Upload.MetaData.skynet == 'true',(size,hash,skylink) => cb(null,{ipfshash: hash, skylink: skylink, size: size}))
+                    videohash: async (cb) => {
+                        await addFile(filepath,true,Config.Skynet.enabled && json.Event.Upload.MetaData.skynet == 'true',(size,hash,skylink) => cb(null,{ipfshash: hash, skylink: skylink, size: size}))
                     },
                     spritehash: (cb) => {
                         addSprite(filepath,ID).then(r=>cb(null,r))
