@@ -216,7 +216,7 @@ app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),body
                     request.socket.setTimeout(0)
 
                     // Get user by access token then process upload
-                    FileUploader.handleTusUpload(request.body,user,network,() => {
+                    FileUploader.handleTusUpload(request.body.Event,user,network,() => {
                         if (request.body.Event.Upload.MetaData.type !== 'hlsencode')
                             FileUploader.writeUploadRegister()
                         FileUploader.pruneTusPartialUploads(request.body.Event.Upload.PartialUploads)
