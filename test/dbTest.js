@@ -1,6 +1,6 @@
-const assert = require('chai').assert
-const db = require('../src/dbManager')
-const Config = require('../src/config')
+const assert = (await import('chai')).assert
+const db = (await import('../src/dbManager'))
+const Config = (await import('../src/config'))
 
 describe('Database',() => {
     it('userExistInHashesDB should return a boolean',(done) => {
@@ -36,7 +36,7 @@ describe('Database',() => {
     })
 
     it('getHashesByUser should return arrray of strings representing hashes for a particular user',(done) => {
-        if (!Config.test.hashType || Config.test.hashType === []) return done()
+        if (!Config.test.hashType || Config.test.hashType.length == 0) return done()
         for(let i = 0; i < Config.test.hashType.length; i++) {
             // Record some test hashes
             db.recordHash(Config.test.user,'all',Config.test.hashType[i],'Qmtesthash123',1073741824)

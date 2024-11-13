@@ -1,6 +1,6 @@
-const assert = require('chai').assert
-const Auth = require('../src/authManager')
-const Config = require('../src/config')
+const assert = (await import('chai')).assert
+const Auth = await import('../src/authManager')
+const Config = await import('../src/config')
 const user = Config.test.user
 const app = Config.tokenApp
 

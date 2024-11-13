@@ -1,6 +1,6 @@
-const assert = require('chai').assert
-const uploader = require('../src/ipfsUploadHandler')
-const Config = require('../src/config')
+const assert = import('chai').assert
+const uploader = (await import('../src/ipfsUploadHandler.js')).default
+const Config = (await import('../src/config.js')).default
 const hiveEncoder = Config.test.hiveUser+'@hive'
 const random = uploader.IPSync.randomID()
 
