@@ -168,69 +168,65 @@ app.post('/uploadChunk', authLimiter, bodyParser.json({ verify: rawBodySaver }),
 })
 
 app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),bodyParser.urlencoded({ verify: rawBodySaver, extended: true }),bodyParser.raw({ verify: rawBodySaver, type: '*/*' }),(request,response) => {
-    if (request.body.Type == 'pre-create' || request.body.Type == 'post-finish') {
-        if (!request.body || !request.body.Event || !request.body.Event.HTTPRequest || !request.body.Event.HTTPRequest.Header) {
-            console.log(request.body)
-            console.log("Sending status code 400:", { error: 'Bad request' })
-            return response.status(400).send({ error: 'Bad request' })
-        } else if (!Array.isArray(request.body.Event.HTTPRequest.Header.Authorization) || request.body.Event.HTTPRequest.Header.Authorization.length === 0) {
-            console.log("Missing auth headers")
-            return response.status(400).send({ error: 'Missing auth headers' })
-        }
-        let authHeader = request.body.Event.HTTPRequest.Header.Authorization[0].split(' ')
-        if (authHeader.length < 2 || authHeader[0] !== 'Bearer') {
-            console.log("Error: Auth header must be a bearer")
-            return response.status(400).send({ error: 'Auth header must be a bearer' })
-        }
-        Auth.authenticateTus(authHeader[1],true,(e,user,network) => {
-            if (e) return response.status(401).send({error: e})
-            if (request.body.Event.Upload && request.body.Event.Upload.IsPartial)
-                // return response.status(200).send()
-            switch (request.body.Type) {
-                case "pre-create":
-                    // Upload type check
-                    if(request.body.Event.Upload && request.body.Event.Upload.MetaData.type && !db.getPossibleTypes().includes(request.body.Event.Upload.MetaData.type) && request.body.Event.Upload.MetaData.type !== 'hlsencode') {
-                        console.log("Body:", request.body)
-                        console.log("Invalid type:", request.body.Event.Upload.MetaData.type)
-                        return response.status(400).send({error: 'Invalid upload type'})
-                    }
-                    if (request.body.Event.Upload && request.body.Event.Upload.MetaData.type === 'hlsencode') {
-                        let fullusername = db.toFullUsername(user,network)
-                        if (request.body.Event.Upload.MetaData.selfEncode) {
-                            if (!request.body.Event.Upload.MetaData.encodeID || FileUploader.selfEncoderGet(fullusername).id !== request.body.Event.Upload.MetaData.encodeID)
-                                return response.status(401).send({error: 'Invalid self encode ID'})
-                        } else {
-                            if (!Config.admins.includes(fullusername) && !Config.Encoder.accounts.includes(fullusername) && !Config.admins.includes(user) && !Config.Encoder.accounts.includes(user))
-                                return response.status(401).send({error: 'Uploads from encoding servers must be an admin or encoder account.'})
-
-                            if (FileUploader.remoteEncoding(fullusername) !== request.body.Event.Upload.MetaData.encodeID)
-                                return response.status(401).send({error: 'Encoding upload ID currently not first in queue'})
-                        }
-                        if (isNaN(parseInt(request.body.Event.Upload.MetaData.idx)) || parseInt(request.body.Event.Upload.MetaData.idx) < -1)
-                            return response.status(401).send({error: 'Invalid encoder output file index'})
-                        if (isNaN(parseInt(request.body.Event.Upload.MetaData.output)) && request.body.Event.Upload.MetaData.output !== 'sprite')
-                            return response.status(401).send({error: 'Invalid encoder output'})
-                    }
-                    return response.status(200).send({})
-                case "post-finish":
-                    request.socket.setTimeout(0)
-
-                    // Get user by access token then process upload
-                    FileUploader.handleTusUpload(request.body.Event,user,network,() => {
-                        if (request.body.Event.Upload.MetaData.type !== 'hlsencode')
-                            FileUploader.writeUploadRegister()
-                        FileUploader.pruneTusPartialUploads(request.body.Event.Upload.PartialUploads)
-                        response.status(200).send({})
-                    })
-                    break
-                default:
-                    response.status(200).send({})
-                    break
-            }
-        })
-    } else {
-        response.status(200).send({})
+    if (!request.body || !request.body.Event || !request.body.Event.HTTPRequest || !request.body.Event.HTTPRequest.Header) {
+        console.log(request.body)
+        console.log("Sending status code 400:", { error: 'Bad request' })
+        return response.status(400).send({ error: 'Bad request' })
+    } else if (!Array.isArray(request.body.Event.HTTPRequest.Header.Authorization) || request.body.Event.HTTPRequest.Header.Authorization.length === 0) {
+        console.log("Missing auth headers")
+        return response.status(400).send({ error: 'Missing auth headers' })
     }
+    let authHeader = request.body.Event.HTTPRequest.Header.Authorization[0].split(' ')
+    if (authHeader.length < 2 || authHeader[0] !== 'Bearer') {
+        console.log("Error: Auth header must be a bearer")
+        return response.status(400).send({ error: 'Auth header must be a bearer' })
+    }
+    Auth.authenticateTus(authHeader[1],true,(e,user,network) => {
+        if (e) return response.status(401).send({error: e})
+        if (request.body.Event.Upload && request.body.Event.Upload.IsPartial)
+            // return response.status(200).send()
+        switch (request.body.Type) {
+            case "pre-create":
+                // Upload type check
+                if(request.body.Event.Upload && request.body.Event.Upload.MetaData.type && !db.getPossibleTypes().includes(request.body.Event.Upload.MetaData.type) && request.body.Event.Upload.MetaData.type !== 'hlsencode') {
+                    console.log("Body:", request.body)
+                    console.log("Invalid type:", request.body.Event.Upload.MetaData.type)
+                    return response.status(400).send({error: 'Invalid upload type'})
+                }
+                if (request.body.Event.Upload && request.body.Event.Upload.MetaData.type === 'hlsencode') {
+                    let fullusername = db.toFullUsername(user,network)
+                    if (request.body.Event.Upload.MetaData.selfEncode) {
+                        if (!request.body.Event.Upload.MetaData.encodeID || FileUploader.selfEncoderGet(fullusername).id !== request.body.Event.Upload.MetaData.encodeID)
+                            return response.status(401).send({error: 'Invalid self encode ID'})
+                    } else {
+                        if (!Config.admins.includes(fullusername) && !Config.Encoder.accounts.includes(fullusername) && !Config.admins.includes(user) && !Config.Encoder.accounts.includes(user))
+                            return response.status(401).send({error: 'Uploads from encoding servers must be an admin or encoder account.'})
+
+                        if (FileUploader.remoteEncoding(fullusername) !== request.body.Event.Upload.MetaData.encodeID)
+                            return response.status(401).send({error: 'Encoding upload ID currently not first in queue'})
+                    }
+                    if (isNaN(parseInt(request.body.Event.Upload.MetaData.idx)) || parseInt(request.body.Event.Upload.MetaData.idx) < -1)
+                        return response.status(401).send({error: 'Invalid encoder output file index'})
+                    if (isNaN(parseInt(request.body.Event.Upload.MetaData.output)) && request.body.Event.Upload.MetaData.output !== 'sprite')
+                        return response.status(401).send({error: 'Invalid encoder output'})
+                }
+                return response.status(200).send({})
+            case "post-finish":
+                request.socket.setTimeout(0)
+
+                // Get user by access token then process upload
+                FileUploader.handleTusUpload(request.body.Event,user,network,() => {
+                    if (request.body.Event.Upload.MetaData.type !== 'hlsencode')
+                        FileUploader.writeUploadRegister()
+                    FileUploader.pruneTusPartialUploads(request.body.Event.Upload.PartialUploads)
+                    response.status(200).send({})
+                })
+                break
+            default:
+                response.status(200).send({})
+                break
+        }
+    })
     // console.log(request.headers['hook-name'],request.body.Upload)
 })
 

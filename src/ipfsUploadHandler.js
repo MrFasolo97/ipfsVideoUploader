@@ -312,6 +312,7 @@ let uploadOps = {
     encoderQueue,
     handleTusUpload: async (json,user,network,callback) => {
         let filepath = await json.Upload.Storage.Path
+        console.log(filepath)
         console.log(await json.Upload.MetaData.type)
         switch (await json.Upload.MetaData.type) {
             case 'hlsencode':
