@@ -50,7 +50,7 @@ const supportedEncoders = [
 ]
 const MB = 1048576
 
-let uploadRegister = JSON.parse(fs.readFileSync(defaultDir+'/db/register.json','utf8'))
+let uploadRegister = await JSON.parse(fs.readFileSync(defaultDir+'/db/register.json','utf8'))
 let socketRegister = {}
 let encoderRegister = {}
 let spkPinsRegister = {}
