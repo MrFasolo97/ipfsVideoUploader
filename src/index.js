@@ -189,7 +189,7 @@ app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),body
                         console.log("Invalid type:", request.body.Event.Upload.MetaData.type)
                         return response.status(400).send({error: 'Invalid upload type'})
                     }
-                    if (request.body.Upload.MetaData.type === 'hlsencode') {
+                    if (request.body.Event.Upload && request.body.Upload.MetaData.type === 'hlsencode') {
                         let fullusername = db.toFullUsername(user,network)
                         if (request.body.Event.Upload.MetaData.selfEncode) {
                             if (!request.body.Event.Upload.MetaData.encodeID || FileUploader.selfEncoderGet(fullusername).id !== request.body.Event.Upload.MetaData.encodeID)
