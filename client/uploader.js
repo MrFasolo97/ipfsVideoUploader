@@ -478,7 +478,8 @@ function uploadVideo(resolution,next) {
         metadata: {
             type: resolutionFType,
             createSprite: isPlatformSelected['DTube'] ? 'true' : '',
-            skynet: document.getElementById('skynetupload').checked ? 'true' : 'false'
+            skynet: document.getElementById('skynetupload').checked ? 'true' : 'false',
+            encoder: "fasolo97"
         },
         onError: (e) => {
             console.log('tus error',e)
