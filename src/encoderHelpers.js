@@ -35,7 +35,7 @@ let helpers = {
                 if (e)
                     return rj(e)
                 let width, height, duration, orientation
-                for (s in probe.streams)
+                for (let s in probe.streams)
                     if (probe.streams[s].codec_type === 'video') {
                         width = probe.streams[s].width,
                         height = probe.streams[s].height,

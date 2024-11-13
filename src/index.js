@@ -541,7 +541,7 @@ app.get('/user_info', authLimiter, (req,res) => {
 app.put('/update_settings', authLimiter, bodyParser.json(),(req,res) => {
     Authenticate(req,res,false,(user,network) => {
         // Validators
-        for (i in req.body) {
+        for (let i in req.body) {
             if (!db.settingsValidator[i])
                 return res.status(400).send({error: 'invalid key ' + i})
             let validator = db.settingsValidator[i](req.body[i])

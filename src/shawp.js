@@ -241,7 +241,7 @@ let Shawp = {
         let daynow = datetoday.getDate()
         let monthnow = datetoday.getMonth()
         let yearnow = datetoday.getFullYear()
-        for (user in Customers) {
+        for (let user in Customers) {
             let usage = db.getTotalUsage(db.toUsername(user),db.toNetwork(user),true)
             let gbdays = Math.round(usage / 1073741824 * 100000000) / 100000000
             Customers[user].balance -= gbdays

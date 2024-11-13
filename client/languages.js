@@ -230,7 +230,7 @@ exports.isValid = function(langcode) {
 //return array with all the language codes supported
 exports.getAllLanguageCode = function() {
   var result = [];
-  for (langcode in langs.lang) {
+  for (let langcode in langs.lang) {
     result.push(langcode);
   }
   return result;
