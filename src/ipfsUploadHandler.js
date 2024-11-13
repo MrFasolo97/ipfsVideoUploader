@@ -312,8 +312,8 @@ let uploadOps = {
     encoderQueue,
     handleTusUpload: async (json,user,network,callback) => {
         let ID = json.MetaData.ID; //tus upload ID
-        console.log(ID)
-        console.log(json.MetaData)
+        console.log(await ID)
+        console.log(await json.MetaData)
         json.Upload.MetaData.output = sanitize(json.Upload.MetaData.output)
         json.Upload.MetaData.idx = sanitize(json.Upload.MetaData.idx)
         switch (json.Upload.MetaData.type) {
@@ -355,7 +355,7 @@ let uploadOps = {
                         if (!json.Upload.MetaData.selfEncode && encoderRegister[db.toFullUsername(user,network)] && encoderRegister[db.toFullUsername(user,network)].socket) {
                             let filepath = json.Upload.Storage.Path;
                             fs.unlinkSync(filepath)
-                            encoderRegister[db.toFullUsername(user,network)].socket.emit('error',{
+                            await encoderRegister[db.toFullUsername(user,network)].socket.emit('error',{
                                 method: 'hlsencode',
                                 id: json.Upload.MetaData.encodeID,
                                 error: 'duplicate sprite upload'
@@ -518,7 +518,7 @@ let uploadOps = {
                 try {
                     await helpers.getFFprobeVideo(filepath)
                 } catch (e) {
-                    if (socketRegister[ID] && socketRegister[ID].socket) socketRegister[ID].socket.emit('error',{error: 'Failed to parse video'})
+                    if (socketRegister[ID] && socketRegister[ID].socket) await socketRegister[ID].socket.emit('error',{error: 'Failed to parse video'})
                     delete socketRegister[ID]
                     callback()
                     return
@@ -562,7 +562,7 @@ let uploadOps = {
                     if (socketRegister[ID] && socketRegister[ID].socket) socketRegister[ID].socket.emit('result',result)
                     delete socketRegister[ID]
                     uploadRegister[ID] = result
-                    ipsync.emit('upload',result)
+                    await ipsync.emit('upload',result)
                     callback()
                 })
                 break
@@ -578,7 +578,7 @@ let uploadOps = {
                     callback()
                     return
                 }
-                addFile(filepath,true,Config.Skynet.enabled && json.Upload.MetaData.skynet == 'true',(size,hash,skylink) => {
+                await addFile(filepath,true,Config.Skynet.enabled && json.Upload.MetaData.skynet == 'true',(size,hash,skylink) => {
                     db.recordHash(user,network,json.Upload.MetaData.type,hash,json.Upload.Size)
                     db.writeHashesData()
                     db.writeHashInfoData()
