@@ -311,7 +311,8 @@ let uploadOps = {
     },
     encoderQueue,
     handleTusUpload: async (json,user,network,callback) => {
-        console.log(await json)
+        console.log(JSON.stringify(await json))
+        console.log(await json.Event.Upload.Storage)
         let ID = json.Event.Upload.ID; //tus upload ID
         // console.log(await ID)
         // console.log(await json.MetaData)
