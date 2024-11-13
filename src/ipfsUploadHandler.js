@@ -317,7 +317,7 @@ let uploadOps = {
         // console.log(await ID)
         // console.log(await json.MetaData)
         if (typeof json.Event.Upload.MetaData == 'undefined') {
-            return callback()
+            return await callback()
         }
         switch (json.Event.Upload.MetaData.type) {
             case 'hlsencode':
