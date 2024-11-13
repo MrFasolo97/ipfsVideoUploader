@@ -183,8 +183,10 @@ app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),body
     }
     Auth.authenticateTus(authHeader[1],true,(e,user,network) => {
         if (e) return response.status(401).send({error: e})
+        /*
         if (request.body.Event.Upload && request.body.Event.Upload.IsPartial)
-            // return response.status(200).send()
+            return response.status(200).send()
+        */
         switch (request.body.Type) {
             case "pre-create":
                 // Upload type check
