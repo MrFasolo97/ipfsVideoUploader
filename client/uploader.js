@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             else
                 updateDisplayByIDs([],['beneficiaryHeading'+capitalizeFirstLetter(grapheneNetworks[g]),'beneficiaryTableList'+capitalizeFirstLetter(grapheneNetworks[g]),'totalBeneficiariesLabel'+capitalizeFirstLetter(grapheneNetworks[g]),grapheneNetworks[g]+'Community'])
 
-        if (config.encoder.accounts.length > 0 || config.encoder.outputs.length > 0) {
+        if (config.Encoder.accounts.length > 0 || config.Encoder.outputs.length > 0) {
             updateDisplayByIDs(['encoderSwitch'],[])
             encoderAvailable = true
         }

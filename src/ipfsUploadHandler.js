@@ -390,7 +390,7 @@ let uploadOps = {
                             return emitToUID(ID,'error',{ error: 'Uploaded file exceeds max size allowed by chosen encoder' })
                         uploadOps.remoteEncoderPushJob(json.Upload.MetaData.encoder,ID,user,network,duration,json.Upload.MetaData.createSprite,json.Upload.MetaData.thumbnailFname)
                         if (encoderRegister[json.Upload.MetaData.encoder].queue.length === 1)
-                            encoderRegister[json.Upload.MetaData.encoder].socket.emit('job', { id: ID })
+                            encoderRegister[json.Upload.MetaData.encoder].socket.emit('job', )
                         return
                     }
 
