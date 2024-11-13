@@ -1,4 +1,4 @@
-const assert = import('chai').assert
+const assert = (await import('chai')).assert
 const uploader = (await import('../src/ipfsUploadHandler.js')).default
 const Config = (await import('../src/config.js')).default
 const hiveEncoder = Config.test.hiveUser+'@hive'
