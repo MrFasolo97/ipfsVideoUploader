@@ -169,8 +169,9 @@ app.post('/uploadChunk', authLimiter, bodyParser.json({ verify: rawBodySaver }),
 
 app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),bodyParser.urlencoded({ verify: rawBodySaver, extended: true }),bodyParser.raw({ verify: rawBodySaver, type: '*/*' }),(request,response) => {
     if (request.body.Type == 'pre-create' || request.body.Type == 'post-finish') {
-        if (!request.body || !request.body.Event.HTTPRequest || !request.body.Event.HTTPRequest.Header) {
+        if (!request.body || !request.body.Event || !request.body.Event.HTTPRequest || !request.body.Event.HTTPRequest.Header) {
             console.log(request.body)
+            console.log("Sending status code 400:", { error: 'Bad request' })
             return response.status(400).send({ error: 'Bad request' })
         } else if (!Array.isArray(request.body.Event.HTTPRequest.Header.Authorization) || request.body.Event.HTTPRequest.Header.Authorization.length === 0)
             return response.status(400).send({ error: 'Missing auth headers' })
