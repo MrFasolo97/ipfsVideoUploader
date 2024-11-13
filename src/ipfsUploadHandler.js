@@ -315,10 +315,10 @@ let uploadOps = {
         let ID = json.Event.Upload.ID; //tus upload ID
         // console.log(await ID)
         // console.log(await json.MetaData)
-        json.Upload.MetaData.output = sanitize(json.Upload.MetaData.output)
-        json.Upload.MetaData.idx = sanitize(json.Upload.MetaData.idx)
         switch (json.Upload.MetaData.type) {
             case 'hlsencode':
+                json.Upload.MetaData.output = sanitize(json.Upload.MetaData.output)
+                json.Upload.MetaData.idx = sanitize(json.Upload.MetaData.idx)
                 // create folders if not exist
                 const workingDir = json.Upload.MetaData.encodeID;
                 if (!fs.existsSync(workingDir))
