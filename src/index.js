@@ -179,28 +179,28 @@ app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),body
             return response.status(400).send({ error: 'Auth header must be a bearer' })
         Auth.authenticateTus(authHeader[1],true,(e,user,network) => {
             if (e) return response.status(401).send({error: e})
-            if (request.body.Upload && request.body.Upload.IsPartial)
+            if (request.body.Event.Upload && request.body.Event.Upload.IsPartial)
                 return response.status(200).send()
             switch (request.body.Type) {
                 case "pre-create":
                     // Upload type check
-                    if(!db.getPossibleTypes().includes(request.body.Upload.MetaData.type) && request.body.Upload.MetaData.type !== 'hlsencode') return response.status(400).send({error: 'Invalid upload type'})
+                    if(!db.getPossibleTypes().includes(request.body.Event.Upload.MetaData.type) && request.body.Event.Upload.MetaData.type !== 'hlsencode') return response.status(400).send({error: 'Invalid upload type'})
 
                     if (request.body.Upload.MetaData.type === 'hlsencode') {
                         let fullusername = db.toFullUsername(user,network)
-                        if (request.body.Upload.MetaData.selfEncode) {
-                            if (!request.body.Upload.MetaData.encodeID || FileUploader.selfEncoderGet(fullusername).id !== request.body.Upload.MetaData.encodeID)
+                        if (request.body.Event.Upload.MetaData.selfEncode) {
+                            if (!request.body.Event.Upload.MetaData.encodeID || FileUploader.selfEncoderGet(fullusername).id !== request.body.Event.Upload.MetaData.encodeID)
                                 return response.status(401).send({error: 'Invalid self encode ID'})
                         } else {
                             if (!Config.admins.includes(fullusername) && !Config.Encoder.accounts.includes(fullusername) && !Config.admins.includes(user) && !Config.Encoder.accounts.includes(user))
                                 return response.status(401).send({error: 'Uploads from encoding servers must be an admin or encoder account.'})
 
-                            if (FileUploader.remoteEncoding(fullusername) !== request.body.Upload.MetaData.encodeID)
+                            if (FileUploader.remoteEncoding(fullusername) !== request.body.Event.Upload.MetaData.encodeID)
                                 return response.status(401).send({error: 'Encoding upload ID currently not first in queue'})
                         }
-                        if (isNaN(parseInt(request.body.Upload.MetaData.idx)) || parseInt(request.body.Upload.MetaData.idx) < -1)
+                        if (isNaN(parseInt(request.body.Event.Upload.MetaData.idx)) || parseInt(request.body.Event.Upload.MetaData.idx) < -1)
                             return response.status(401).send({error: 'Invalid encoder output file index'})
-                        if (isNaN(parseInt(request.body.Upload.MetaData.output)) && request.body.Upload.MetaData.output !== 'sprite')
+                        if (isNaN(parseInt(request.body.Event.Upload.MetaData.output)) && request.body.Event.Upload.MetaData.output !== 'sprite')
                             return response.status(401).send({error: 'Invalid encoder output'})
                     }
                     return response.status(200).send({})
@@ -209,9 +209,9 @@ app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),body
 
                     // Get user by access token then process upload
                     FileUploader.handleTusUpload(request.body,user,network,() => {
-                        if (request.body.Upload.MetaData.type !== 'hlsencode')
+                        if (request.body.Event.Upload.MetaData.type !== 'hlsencode')
                             FileUploader.writeUploadRegister()
-                        FileUploader.pruneTusPartialUploads(request.body.Upload.PartialUploads)
+                        FileUploader.pruneTusPartialUploads(request.body.Event.Upload.PartialUploads)
                         response.status(200).send({})
                     })
                     break
