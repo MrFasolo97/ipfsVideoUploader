@@ -1,6 +1,6 @@
 const assert = (await import('chai')).assert
-const db = (await import('../src/dbManager.js'))
-const Config = (await import('../src/config.js'))
+const db = (await import('../src/dbManager.js')).default
+const Config = (await import('../src/config.js')).default
 
 describe('Database',() => {
     it('userExistInHashesDB should return a boolean',(done) => {

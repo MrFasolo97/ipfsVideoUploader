@@ -1,6 +1,6 @@
 const assert = (await import('chai')).assert
-const Auth = await import('../src/authManager.js')
-const Config = await import('../src/config.js')
+const Auth = (await import('../src/authManager.js')).default
+const Config = (await import('../src/config.js')).default
 const user = Config.test.user
 const app = Config.tokenApp
 

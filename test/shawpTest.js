@@ -1,6 +1,6 @@
 const assert = (await import('chai')).assert
-const Shawp = await import('../src/shawp.js')
-const Config = await import('../src/config.js')
+const Shawp = (await import('../src/shawp.js')).default
+const Config = (await import('../src/config.js')).default
 
 let userAlreadyExist = Shawp.UserExists(Config.test.user,'all')
 
