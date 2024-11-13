@@ -184,7 +184,7 @@ app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),body
             switch (request.body.Type) {
                 case "pre-create":
                     // Upload type check
-                    if(!db.getPossibleTypes().includes(request.body.Event.Upload.MetaData.type) && request.body.Event.Upload.MetaData.type !== 'hlsencode') {
+                    if(request.body.Event.Upload.MetaData.type && !db.getPossibleTypes().includes(request.body.Event.Upload.MetaData.type) && request.body.Event.Upload.MetaData.type !== 'hlsencode') {
                         console.log("Body:", request.body)
                         console.log("Invalid type:", request.body.Event.Upload.MetaData.type)
                         return response.status(400).send({error: 'Invalid upload type'})
