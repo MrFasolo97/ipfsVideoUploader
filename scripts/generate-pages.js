@@ -1,7 +1,7 @@
 // HTML page generator for markdown documentations
 import * as fs from 'node:fs'
 import path from 'node:path'
-import marked from 'marked'
+import * as marked from 'marked'
 const template = fs.readFileSync(path.resolve()+'/client/docs.html','utf-8')
 const title = 'OneLoveIPFS Uploader'
 
