@@ -262,7 +262,7 @@ ipcMain.on('fs_upload', async (evt,arg) => {
 })
 
 // Update check
-axios.get('https://uploader.oneloveipfs.com/latest_build').then((build) => {
+axios.get('https://upload.dtube.app/latest_build').then((build) => {
     if (config.Build.number < build.data.number) {
         let updateNotify = new Notification({
             title: 'An update is available',

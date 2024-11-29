@@ -3,11 +3,11 @@
   "productName": "OneLoveIPFS",
   "version": "3.2.0",
   "description": "Cross-platform IPFS uploader for 3Speak and DTube videos.",
-  "homepage": "https://uploader.oneloveipfs.com",
+  "homepage": "https://upload.dtube.app",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/oneloveipfs/ipfsVideoUploader"
+    "url": "https://github.com/MrFasolo97/ipfsVideoUploader"
   },
   "main": "src/electronApp.js",
   "scripts": {
@@ -24,7 +24,7 @@
     "remove-olisc": "npm un olisc"
   },
   "build": {
-    "appId": "com.oneloveipfs.uploader",
+    "appId": "app.dtube.upload",
     "productName": "OneLoveIPFS",
     "copyright": "Copyright (C) 2023 TechCoderX",
     "files": [
@@ -79,7 +79,7 @@
     }
   },
   "author": "techcoderx <engtianxi@outlook.com>",
-  "bugs": "https://github.com/oneloveipfs/ipfsVideoUploader/issues",
+  "bugs": "https://github.com/MrFasolo97/ipfsVideoUploader/issues",
   "license": "GPLv3",
   "dependencies": {
     "@libp2p/interface": "^2.2.0",

@@ -24,7 +24,7 @@ In the event of any conflicts between the definitions defined here and the Agree
 * "Terms of Service" (or simply "Terms") refers to the terms specified in this Agreement.
 * "Transaction" refers to operations submitted to the Blockchains, including but not limited to comment, vote and transfer.
 * "We", "us", "our" refers to OneLoveIPFS.
-* "Website" refers to web content and APIs accessible through https://oneloveipfs.com and its subdomains (including but not limited to https://uploader.oneloveipfs.com, https://tusd.oneloveipfs.com and https://video.oneloveipfs.com).
+* "Website" refers to web content and APIs accessible through https://dtube.app, https://dtube.fso.ovh and their subdomains (including but not limited to https://upload.dtube.app, https://tusd.dtube.app and https://video.dtube.app).
 * "You" means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.
 
 ## 1. Acknowledgement

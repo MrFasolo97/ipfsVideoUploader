@@ -40,7 +40,7 @@ As for our hosting service (accessing through webapp or desktop app), please con
 
 ## 2. I'm getting a network error while uploading. Is there a server issue?
 
-For remotely hosted service (i.e. uploader.oneloveipfs.com), check your internet connection and try again later. If webpage fails to load right after you get this error, there is an issue with the upload servers. You may also want to check the #service-notices channel on our [Discord server](https://discord.gg/QsBnrwqsSV) for any service outages.
+For remotely hosted service (i.e. upload.dtube.app), check your internet connection and try again later. If webpage fails to load right after you get this error, there is an issue with the upload servers. You may also want to check the #service-notices channel on our [Discord server](https://discord.gg/QsBnrwqsSV) for any service outages.
 
 For standalone server accessed through localhost, ensure that the tusd server is actually running with the correct webhooks and `ClientConfig.tusdEndpoint` is pointed at the correct tusd endpoint.
 
@@ -86,9 +86,9 @@ Certain features may or may not be available on the webapp or the desktop app. S
 
 ## 10. What is the difference between the local and remote runtime environment?
 
-The local environment is designed to communicate directly with a locally running IPFS daemon for ease of use, it does not communicate to a remote service (with exception of update checks). The remote environment communicates with a remote service (such as uploader.oneloveipfs.com) and works like the webapp, but with some features that are exclusive to the desktop app.
+The local environment is designed to communicate directly with a locally running IPFS daemon for ease of use, it does not communicate to a remote service (with exception of update checks). The remote environment communicates with a remote service (such as upload.dtube.app) and works like the webapp, but with some features that are exclusive to the desktop app.
 
-See [here](https://github.com/oneloveipfs/ipfsVideoUploader#local-vs-remote-vs-standalone-vs-web) for more details between the builds.
+See [here](https://github.com/MrFasolo97/ipfsVideoUploader#local-vs-remote-vs-standalone-vs-web) for more details between the builds.
 
 ## 11. How do I switch between local and remote runtime environments?
 
