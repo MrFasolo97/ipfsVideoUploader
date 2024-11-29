@@ -179,7 +179,7 @@ OneLoveIPFS will terminate the Service of repeat copyright infringers.
 ## 21. Copyright Infringement, DMCA takedowns
 1. We will respond to legitimate requests under the Digital Millennium Copyright Act ("DMCA"), and we retain the right to remove access to user content provided via the Service that we deem to be infringing the copyright of others.
 
-2. If you believe your copyright is being infringed by a person using the Service, please submit a properly formatted DMCA request (see 17 U.S.C. § 512) to graylan00@protonmail.com. Your notice must include the following:
+2. If you believe your copyright is being infringed by a person using the Service, please submit a properly formatted DMCA request (see 17 U.S.C. § 512) to fasolo97@proton.me. Your notice must include the following:
 
     - A physical or electronic signature of a person authorized to act on behalf of the owner of an exclusive right that is allegedly infringed.
     - Identification of the copyrighted work claimed to have been infringed, or if multiple copyrighted works are covered by a single notification, a representative list of such works.
