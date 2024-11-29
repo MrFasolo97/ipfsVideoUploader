@@ -998,7 +998,7 @@ textarea {
     margin-block-end: 0em;
 }
 
-#head h3 {
+#head h3, #head h5 {
     font-size: 30px;
     margin-left: 50px;
     margin-right: 50px;
