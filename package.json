@@ -101,7 +101,7 @@
     "hivesigner": "^3.3.4",
     "http-proxy": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
-    "kubo-rpc-client": "^5.0.2",
+    "kubo-rpc-client": "^5.1.0",
     "libp2p": "^2.2.1",
     "multer": "^1.4.5-lts.1",
     "multiformats": "^13.3.1",
