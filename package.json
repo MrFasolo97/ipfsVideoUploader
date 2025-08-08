@@ -103,7 +103,7 @@
     "jsonwebtoken": "^9.0.2",
     "kubo-rpc-client": "^5.1.0",
     "libp2p": "^2.2.1",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^2.0.2",
     "multiformats": "^13.3.1",
     "node-schedule": "^2.1.1",
     "node-webvtt": "^1.9.4",
@@ -116,11 +116,11 @@
     "@types/marked": "^5.0.2",
     "browserify": "^17.0.1",
     "chai": "^4.3.7",
-    "electron": "^24.1.1",
+    "electron": "^37.2.6",
     "electron-builder": "^25.1.8",
     "marked": "^4.3.0",
     "mocha": "^10.2.0",
-    "tinyify": "^4.0.0"
+    "tinyify": "^3.1.0"
   },
   "snyk": true,
   "optionalDependencies": {
