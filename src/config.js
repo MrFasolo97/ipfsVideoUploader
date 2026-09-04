@@ -5,32 +5,31 @@ const defaultFfprobePath = (await import('ffprobe-static')).default.path.replace
 const dataDir = (process.env.ONELOVEIPFS_DATA_DIR || (await import('os')).homedir() + '/.oneloveipfs')
 const userconfigdir = dataDir+'/config.json'
 let isRemoteApp = fs.existsSync(dataDir+'/db/app_type') ? fs.readFileSync(dataDir+'/db/app_type','utf-8').trim() === '1' : false
-let configPath = null, defaultConfig = null;
-if (fs.existsSync('./config.json')) {
+let configPath = null, defaultConfig =  null;
+if (await fs.existsSync('./config.json')) {
     configPath = './config.json'
-} else if (configPath == null && fs.existsSync('../ipfsVideoUploader/config.json')) {
+} else if (configPath == null && await fs.existsSync('../ipfsVideoUploader/config.json')) {
     configPath = '../ipfsVideoUploader/config.json'
 }
 
-if (configPath == null && fs.existsSync('./config_example.json')) {
+if (configPath == null && await fs.existsSync('./config_example.json')) {
     configPath = './config_example.json'
-} else if (configPath == null && fs.existsSync('../ipfsVideoUploader/config_example.json')) {
+} else if (configPath == null && await fs.existsSync('../ipfsVideoUploader/config_example.json')) {
     configPath = '../ipfsVideoUploader/config_example.json'
 }
 
 
 try {
-    defaultConfig = await JSON.parse(fs.readFileSync(configPath));
+    defaultConfig = await JSON.parse(await fs.readFileSync(configPath));
 } catch {
     // using example config
 }
 let userConfig = {}
-
 if (fs.existsSync(userconfigdir)) {
     let readConfig = fs.readFileSync(userconfigdir,'utf8')
     try {
-        userConfig = JSON.parse(readConfig)
-        defaultConfig = deepmerge(defaultConfig,userConfig)
+        userConfig = await JSON.parse(readConfig)
+        defaultConfig = await deepmerge(defaultConfig,userConfig)
     } catch (error) {
         console.log('failed to parse user defined config.json, using default config instead')
     }
@@ -50,13 +49,16 @@ if ((process.platform == 'win32' && !isRemoteApp) || (hasElectron && require('el
 }
 
 // authIdentifier must not contain colons
-if (!isRemoteApp && defaultConfig.ClientConfig.authIdentifier.includes(':')) {
-    console.log('removing all colons from authIdentifier')
-    defaultConfig.ClientConfig.authIdentifier = defaultConfig.ClientConfig.authIdentifier.replace(/:/g,'')
+if (!isRemoteApp && defaultConfig != null) {
+    if (typeof(defaultConfig.ClientConfig) != 'undefined') {
+      if (defaultConfig.ClientConfig.authIdentifier.includes(':')) {
+        console.log('removing all colons from authIdentifier')
+        defaultConfig.ClientConfig.authIdentifier = defaultConfig.ClientConfig.authIdentifier.replace(/:/g,'')
+      }
+    }
 }
-
 // check olisc installation if enabled
-if (!isRemoteApp && defaultConfig.Olisc.enabled) {
+if (!isRemoteApp && defaultConfig != null && defaultConfig.Olisc.enabled) {
     try {
         require.resolve('olisc')
     } catch {
