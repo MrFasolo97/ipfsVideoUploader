@@ -8,6 +8,7 @@ const encoderHelper = (await import('./encoderHelpers.js')).default
 const db = (await import('./dbManager.js')).default
 const Auth = (await import('./authManager.js')).default
 const Shawp = (await import('./shawp.js')).default
+const AvalonStake = (await import('./avalonStake.js')).default
 const fs = await import('fs')
 import bodyParser from 'body-parser'
 const [major, minor, patch] = process.versions.node.split('.').map(Number)
@@ -147,7 +148,25 @@ app.get('/auth', authLimiter, (request,response) => {
     let access_token = request.query.access_token
     Auth.verifyAuth(access_token,false,(err,res) => {
         if (err) return response.status(401).send({error: err})
-        else return response.send(res)
+        else {
+            // Add tier info if freemium is enabled
+            if (Config.Freemium && Config.Freemium.enabled && res && res.tier) {
+                let storageUsed = db.getTotalUsage(res.user, res.network)
+                let storageLimit = db.getStorageLimitBytes(res.tier)
+                return response.send({
+                    ...res,
+                    storageUsed: storageUsed,
+                    storageUsedGB: (storageUsed / 1073741824).toFixed(2),
+                    storageLimit: storageLimit,
+                    storageLimitGB: res.tier.storageGB === Infinity ? 'unlimited' : res.tier.storageGB,
+                    uploadsLastHour: db.getUploadCountInLastHour(res.user, res.network),
+                    rateLimitPerHour: res.tier.rateLimitPerHour === Infinity ? 'unlimited' : res.tier.rateLimitPerHour,
+                    maxUploadMB: res.tier.maxUploadMB === Infinity ? 'unlimited' : res.tier.maxUploadMB,
+                    hlsOutputs: res.tier.hlsOutputs || []
+                })
+            }
+            return response.send(res)
+        }
     })
 })
 
@@ -162,7 +181,21 @@ app.post('/uploadImage', authLimiter, async (request,response) => {
 
 app.post('/uploadSubtitle', authLimiter, async (request,response) => {
     if (Config.enforceIPFSOnline && await FileUploader.isIPFSOnline() === false) return response.status(503).send({error: 'IPFS daemon is offline'})
-    Authenticate(request,response,true,(user,network) => FileUploader.uploadSubtitles(user,network,request,response))
+    Authenticate(request,response,true,(user,network) => {
+        // Freemium: rate limit check for subtitle uploads
+        if (Config.Freemium && Config.Freemium.enabled) {
+            let uploadsLastHour = db.getUploadCountInLastHour(user, network)
+            // Use 5x the video rate limit for subtitles (smaller files)
+            let shawpBal = 0
+            if (Config.Shawp.Enabled) shawpBal = Shawp.User(user,network).balance || 0
+            AvalonStake.getEffectiveTier(user, shawpBal).then(tier => {
+                if (tier.tier !== 'shawp' && uploadsLastHour >= tier.rateLimitPerHour * 5)
+                    return response.status(429).send({error: 'Upload rate limit exceeded. Please try again later.'})
+                FileUploader.uploadSubtitles(user,network,request,response)
+            })
+        } else
+            FileUploader.uploadSubtitles(user,network,request,response)
+    })
 })
 
 app.post('/uploadStream', authLimiter, async (request,response) => {
@@ -189,7 +222,7 @@ app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),body
         console.log("Error: Auth header must be a bearer")
         return response.status(400).send({ error: 'Auth header must be a bearer' })
     }
-    Auth.authenticateTus(authHeader[1],true,(e,user,network) => {
+    Auth.authenticateTus(authHeader[1],true,async (e,user,network) => {
         if (e) return response.status(401).send({error: e})
         /*
         if (request.body.Event.Upload && request.body.Event.Upload.IsPartial)
@@ -203,6 +236,43 @@ app.post('/uploadVideoResumable', bodyParser.json({ verify: rawBodySaver }),body
                     console.log("Invalid type:", request.body.Event.Upload.MetaData.type)
                     return response.status(400).send({error: 'Invalid upload type'})
                 }
+
+                // Freemium pre-upload checks (size + storage + rate limit)
+                if (Config.Freemium && Config.Freemium.enabled && request.body.Event.Upload && request.body.Event.Upload.MetaData.type !== 'hlsencode') {
+                    let uploadType = request.body.Event.Upload.MetaData.type
+                    let uploadSize = request.body.Event.Upload.Size || 0
+                    let shawpBal = 0
+                    if (Config.Shawp.Enabled) {
+                        let shawpUser = Shawp.User(user, network)
+                        shawpBal = shawpUser.balance || 0
+                    }
+                    let effectiveTier = await AvalonStake.getEffectiveTier(user, shawpBal)
+
+                    // Storage check
+                    let storageUsed = db.getTotalUsage(user, network)
+                    let storageLimit = db.getStorageLimitBytes(effectiveTier)
+                    if (storageUsed >= storageLimit) {
+                        console.log('Freemium: storage exceeded for', user, (storageUsed / 1073741824).toFixed(2) + 'GB / ' + effectiveTier.storageGB + 'GB')
+                        return response.status(402).send({error: 'Storage quota exceeded (' + (storageUsed / 1073741824).toFixed(2) + ' GB / ' + effectiveTier.storageGB + ' GB). Upgrade your DTC stake or purchase Shawp credits.'})
+                    }
+
+                    // File size check (skip for thumbnails/images/subtitles/chunks)
+                    if (uploadType !== 'thumbnails' && uploadType !== 'images' && uploadType !== 'subtitles' && uploadType !== 'chunks' && uploadType !== 'streams') {
+                        let maxBytes = effectiveTier.maxUploadMB * 1048576
+                        if (uploadSize > maxBytes) {
+                            console.log('Freemium: file too large for', user, uploadType, (uploadSize / 1048576).toFixed(0) + 'MB > ' + effectiveTier.maxUploadMB + 'MB')
+                            return response.status(400).send({error: 'File size (' + (uploadSize / 1048576).toFixed(0) + ' MB) exceeds ' + effectiveTier.tier + ' tier limit (' + effectiveTier.maxUploadMB + ' MB).'})
+                        }
+                    }
+
+                    // Rate limit check
+                    let uploadsLastHour = db.getUploadCountInLastHour(user, network)
+                    if (uploadsLastHour >= effectiveTier.rateLimitPerHour) {
+                        console.log('Freemium: rate limit for', user, uploadsLastHour + '/' + effectiveTier.rateLimitPerHour)
+                        return response.status(429).send({error: 'Upload rate limit exceeded (' + uploadsLastHour + '/' + effectiveTier.rateLimitPerHour + ' per hour). Please try again later.'})
+                    }
+                }
+
                 if (request.body.Event.Upload && request.body.Event.Upload.MetaData.type === 'hlsencode') {
                     let fullusername = db.toFullUsername(user,network)
                     if (request.body.Event.Upload.MetaData.selfEncode) {
@@ -278,6 +348,47 @@ app.get('/usage',(request,response) => {
     if (!request.query.user || request.query.user === '') return response.send('Username is not defined!');
     let usage = db.getUsage(request.query.user,request.query.network)
     response.send(usage)
+})
+
+// Freemium tier endpoints
+app.get('/tier/config',(req,res) => {
+    if (!Config.Freemium || !Config.Freemium.enabled) return res.send({ enabled: false })
+    res.send({
+        enabled: true,
+        tiers: AvalonStake.TIERS,
+        minVideoDurationSec: AvalonStake.MIN_VIDEO_DURATION_SEC
+    })
+})
+
+app.get('/tier', authLimiter, (req,res) => {
+    Authenticate(req,res,false,async (user,network) => {
+        let shawpBal = 0
+        if (Config.Shawp.Enabled) {
+            let shawpUser = Shawp.User(user, network)
+            shawpBal = shawpUser.balance || 0
+        }
+        let effectiveTier = await AvalonStake.getEffectiveTier(user, shawpBal)
+        let storageUsed = db.getTotalUsage(user, network)
+        let storageLimit = db.getStorageLimitBytes(effectiveTier)
+        let uploadsLastHour = db.getUploadCountInLastHour(user, network)
+
+        let isAdmin = Config.admins.includes(user)
+        res.send({
+            user: user,
+            network: network,
+            tier: effectiveTier.tier,
+            dtcBalance: effectiveTier.dtcBalance || 0,
+            storageUsed: storageUsed,
+            storageUsedGB: (storageUsed / 1073741824).toFixed(2),
+            storageLimit: storageLimit,
+            storageLimitGB: effectiveTier.storageGB === Infinity ? 'unlimited' : effectiveTier.storageGB,
+            uploadsLastHour: uploadsLastHour,
+            rateLimitPerHour: effectiveTier.rateLimitPerHour === Infinity ? 'unlimited' : effectiveTier.rateLimitPerHour,
+            maxUploadMB: effectiveTier.maxUploadMB === Infinity ? 'unlimited' : effectiveTier.maxUploadMB,
+            hlsOutputs: effectiveTier.hlsOutputs || [],
+            isAdmin: isAdmin
+        })
+    })
 })
 
 // Get everyone's usage. Admin only API
@@ -666,4 +777,7 @@ if (!Config.isRemoteApp && Config.Olisc.enabled) {
 } else
     route404()
 
-http.listen(Config.HTTP_PORT,Config.HTTP_BIND_IP)
+http.listen(Config.HTTP_PORT,Config.HTTP_BIND_IP, (err) => {
+  if (err) throw err
+  console.log("Listening on " + Config.HTTP_BIND_IP + ":"+Config.HTTP_PORT+" ...")
+})

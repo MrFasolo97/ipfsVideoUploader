@@ -18,6 +18,7 @@ const Auth = (await import('./authManager.js')).default
 const ProcessingQueue = (await import('./processingQueue.js')).default
 const helpers = (await import('./encoderHelpers.js')).default
 const spk = (await import('./spk.js')).default
+const AvalonStake = (await import('./avalonStake.js')).default
 const defaultDir = process.env.ONELOVEIPFS_DATA_DIR || (await import('os')).homedir() + '/.oneloveipfs'
 
 let SocketIO, ipsync, uplstatusio, encoderdio
@@ -196,6 +197,38 @@ const getDuration = (path) => {
     })
 }
 
+// Freemium pre-upload gatekeeper
+const checkFreemium = async (username, network, fileSize, type) => {
+    if (!Config.Freemium || !Config.Freemium.enabled) return { allowed: true }
+
+    let shawpBal = 0
+    if (Config.Shawp.Enabled) {
+        let shawpUser = Shawp.User(username, network)
+        shawpBal = shawpUser.balance || 0
+    }
+    let effectiveTier = await AvalonStake.getEffectiveTier(username, shawpBal)
+
+    // Storage quota check
+    let storageUsed = db.getTotalUsage(username, network)
+    let storageLimit = db.getStorageLimitBytes(effectiveTier)
+    if (storageUsed >= storageLimit)
+        return { allowed: false, status: 402, error: 'Storage quota exceeded (' + (storageUsed / 1073741824).toFixed(2) + ' GB / ' + effectiveTier.storageGB + ' GB). Upgrade your DTC stake or purchase Shawp credits.' }
+
+    // File size check (only for video types, not thumbnails/images)
+    if (fileSize && type !== 'thumbnails' && type !== 'images' && type !== 'subtitles' && type !== 'chunks') {
+        let maxBytes = effectiveTier.maxUploadMB * 1048576
+        if (fileSize > maxBytes)
+            return { allowed: false, status: 400, error: 'File size (' + (fileSize / 1048576).toFixed(0) + ' MB) exceeds ' + effectiveTier.tier + ' tier limit (' + effectiveTier.maxUploadMB + ' MB).' }
+    }
+
+    // Rate limit check
+    let uploadsLastHour = db.getUploadCountInLastHour(username, network)
+    if (uploadsLastHour >= effectiveTier.rateLimitPerHour)
+        return { allowed: false, status: 429, error: 'Upload rate limit exceeded (' + uploadsLastHour + '/' + effectiveTier.rateLimitPerHour + ' per hour). Please try again later.' }
+
+    return { allowed: true, tier: effectiveTier }
+}
+
 let uploadOps = {
     isIPFSOnline: async () => {
         try {
@@ -205,13 +238,18 @@ let uploadOps = {
             return false
         }
     },
-    uploadImage: (username,network,request,response) => {
+    uploadImage: async (username,network,request,response) => {
         let imgType = request.query.type
         if (!imgType) return response.status(400).send({error: 'Image upload type not specified!'})
         if (imgType != 'images' && imgType != 'thumbnails') return response.status(400).send({error: 'Invalid image upload type specified!'})
         let trickleDagAdd = false
         if (imgType === 'images')
             trickleDagAdd = true
+
+        // Freemium pre-upload check
+        let freemiumCheck = await checkFreemium(username, network, null, imgType)
+        if (!freemiumCheck.allowed)
+            return response.status(freemiumCheck.status).send({error: freemiumCheck.error})
 
         imgUpload.single('image')(request,response,(err) => {
             if (err) return response.status(400).send({error: err})
@@ -373,10 +411,19 @@ let uploadOps = {
                 callback()
                 break
             case 'hls':
-                helpers.getFFprobeVideo(filepath).then((d) => {
+                helpers.getFFprobeVideo(filepath).then(async (d) => {
                     let { width, height, duration, orientation } = d
                     if (!width || !height || !duration || !orientation)
                         return emitToUID(json.Upload.ID,'error',{ error: 'could not retrieve ffprobe info on uploaded video' },false)
+
+                    // Freemium: check video duration for free/onboarding tiers
+                    if (Config.Freemium && Config.Freemium.enabled && duration < AvalonStake.MIN_VIDEO_DURATION_SEC) {
+                        let shawpBal = 0
+                        if (Config.Shawp.Enabled) shawpBal = Shawp.User(user,network).balance || 0
+                        let tier = await AvalonStake.getEffectiveTier(user, shawpBal)
+                        if (tier.tier !== 'shawp' && tier.tier !== 'gold')
+                            return emitToUID(json.Upload.ID,'error',{ error: 'Video too short (' + duration.toFixed(1) + 's). Minimum duration is ' + AvalonStake.MIN_VIDEO_DURATION_SEC + 's for ' + tier.tier + ' tier.' },false)
+                    }
 
                     if (json.Upload.MetaData.encoder) {
                         if (!encoderRegister[json.Upload.MetaData.encoder])
@@ -394,7 +441,19 @@ let uploadOps = {
                     else if (Config.Encoder.maxSizeMb && json.Upload.Size > Config.Encoder.maxSizeMb*MB)
                         return emitToUID(json.Upload.ID,'error',{ error: 'Uploaded file exceeds max size allowed by server encoder' })
 
-                    let outputResolutions = helpers.determineOutputs(width,height,Config.Encoder.outputs)
+                    // Freemium: filter encoder outputs by tier
+                    let encoderOutputs = Config.Encoder.outputs
+                    if (Config.Freemium && Config.Freemium.enabled) {
+                        let shawpBal = 0
+                        if (Config.Shawp.Enabled) shawpBal = Shawp.User(user,network).balance || 0
+                        let tier = await AvalonStake.getEffectiveTier(user, shawpBal)
+                        if (tier.hlsOutputs && tier.hlsOutputs.length > 0)
+                            encoderOutputs = Config.Encoder.outputs.filter(r => tier.hlsOutputs.includes(r))
+                        if (encoderOutputs.length === 0)
+                            return emitToUID(json.Upload.ID,'error',{ error: 'HLS encoding not available for your tier (' + tier.tier + ')' },false)
+                    }
+
+                    let outputResolutions = helpers.determineOutputs(width,height,encoderOutputs)
 
                     // Create folders
                     fs.mkdirSync(defaultDir+'/'+json.Upload.ID)

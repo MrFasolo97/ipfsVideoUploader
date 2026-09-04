@@ -63,6 +63,7 @@ axios.get('/proxy_server').then((r) => {
 
 // Vars loaded from config
 let config;
+let userTier = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     let avalonAcc = await Auth.Avalon()
@@ -82,6 +83,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('disabledImg').src = 'public/memes/' + config.disabledMeme
             updateDisplayByIDs(['disabledPage'],['uploadForm','modeBtn'])
             return
+        }
+
+        // Load freemium tier info
+        if (username && token) {
+            let tierCall = '/tier?access_token=' + token
+            if (iskeychain !== 'true') tierCall += '&scauth=true'
+            axios.get(tierCall).then((tierRes) => {
+                userTier = tierRes.data
+                updateTierUI()
+            }).catch(() => {})
         }
 
         // Beneficiaries description text
@@ -141,6 +152,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     document.getElementById('submitbutton').onclick = () => {
+        // Freemium: check video size before upload
+        if (!checkVideoSizeBeforeUpload()) return
+
         // Validate data entered
         postparams.postBody = document.getElementById('postBody').value
         postparams.description = document.getElementById('description').value
@@ -1124,4 +1138,53 @@ function getDefaultCommunity(network) {
         return 'blurt-134220'
     else
         return 'hive-134220'
+}
+
+// Freemium tier UI
+function updateTierUI() {
+    if (!userTier || !userTier.tier) return
+
+    let tierNames = { onboarding: 'Onboarding', free: 'Free', silver: 'Silver', gold: 'Gold', shawp: 'Shawp (Paid)' }
+    let tierColors = { onboarding: '#9e9e9e', free: '#4caf50', silver: '#90a4ae', gold: '#ffc107', shawp: '#2196f3' }
+
+    let tierBadge = document.getElementById('tierBadge')
+    let tierStorage = document.getElementById('tierStorage')
+
+    if (tierBadge) {
+        tierBadge.innerText = tierNames[userTier.tier] || userTier.tier
+        tierBadge.style.backgroundColor = tierColors[userTier.tier] || '#607d8b'
+        tierBadge.style.display = 'inline-block'
+    }
+
+    if (tierStorage) {
+        if (userTier.storageLimitGB === 'unlimited')
+            tierStorage.innerText = 'Storage: ' + userTier.storageUsedGB + ' GB used (unlimited)'
+        else
+            tierStorage.innerText = 'Storage: ' + userTier.storageUsedGB + ' GB / ' + userTier.storageLimitGB + ' GB'
+        tierStorage.style.display = 'block'
+    }
+
+    // Disable submit if storage is full (and not admin)
+    if (!userTier.isAdmin && userTier.storageLimit !== Infinity) {
+        let usedBytes = parseFloat(userTier.storageUsedGB) * 1073741824
+        if (usedBytes >= userTier.storageLimit) {
+            document.getElementById('submitbutton').disabled = true
+            let tierMsg = document.getElementById('tierMessage')
+            if (tierMsg) {
+                tierMsg.innerText = 'Storage quota exceeded. Upgrade your DTC stake or purchase Shawp credits to continue uploading.'
+                tierMsg.style.display = 'block'
+                tierMsg.style.color = '#f44336'
+            }
+        }
+    }
+}
+
+function checkVideoSizeBeforeUpload() {
+    if (!userTier || userTier.maxUploadMB === 'unlimited' || userTier.isAdmin) return true
+    let sourceVideo = document.getElementById('sourcevideo').files
+    if (sourceVideo.length > 0 && sourceVideo[0].size > userTier.maxUploadMB * 1048576) {
+        alert('Video file size (' + (sourceVideo[0].size / 1048576).toFixed(0) + ' MB) exceeds your ' + userTier.tier + ' tier limit of ' + userTier.maxUploadMB + ' MB.')
+        return false
+    }
+    return true
 }

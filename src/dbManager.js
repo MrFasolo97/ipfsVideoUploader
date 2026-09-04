@@ -298,6 +298,26 @@ let db = {
                 console.log('Error saving skylinks: ' + err)
         })
     },
+    // Freemium: rate limiting and storage quota
+    getUploadCountInLastHour: (username,network) => {
+        let fullusername = db.toFullUsername(username,network,true)
+        let count = 0
+        let oneHourAgo = Date.now() - 3600000
+        let userHashes = db.getHashesByUser(possibleTypes,username,network)
+        for (let hashtype in userHashes) {
+            if (!userHashes[hashtype]) continue
+            for (let h in userHashes[hashtype]) {
+                let info = hashInfo[userHashes[hashtype][h]]
+                if (info && typeof info.ts === 'number' && info.ts > oneHourAgo)
+                    count++
+            }
+        }
+        return count
+    },
+    getStorageLimitBytes: (tierConfig) => {
+        if (!tierConfig || !tierConfig.storageGB) return 0
+        return tierConfig.storageGB * 1073741824
+    },
     // Username helpers
     toFullUsername: (username,network,aliasOf) => {
         let result = username

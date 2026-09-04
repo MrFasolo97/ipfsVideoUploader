@@ -6,6 +6,7 @@ import * as fs from 'node:fs'
 import { EOL } from 'node:os';
 import * as Shawp from './shawp.js';
 import HivecryptPro from './hivecryptPro.js';
+import AvalonStake from './avalonStake.js';
 const Crypto = pkg;
 const Config = JSON.parse(fs.readFileSync("./config.json"))
 const dir = process.env.ONELOVEIPFS_DATA_DIR || (await import('os')).default.homedir() + '/.oneloveipfs'
@@ -89,7 +90,7 @@ let auth = {
     },
     verifyAuth: (access_token,needscredits,cb) => {
         if (!access_token) return cb('Missing access token')
-        JWT.verify(access_token,Keys.JWTKey,(err,result) => {
+        JWT.verify(access_token,Keys.JWTKey,async (err,result) => {
             if (err)
                 cb('JWT error: ' + err)
             else if (Config.whitelistEnabled) {
@@ -99,32 +100,46 @@ let auth = {
                     let daysRemaining = Shawp.getDaysRemaining(result.user,result.network)
                     if (daysRemaining.days === 0 && daysRemaining.needs)
                         cb('Insufficient hosting credits, needs additional ' + Math.ceil(daysRemaining.needs) + ' GBdays.')
-                    else
+                    else {
+                        let shawpBal = Shawp.User(result.user,result.network).balance || 0
+                        let effectiveTier = await AvalonStake.getEffectiveTier(result.user, shawpBal)
+                        result.tier = effectiveTier
                         cb(null,result)
-                } else cb(null,result)
-            } else cb(null,result)
+                    }
+                } else {
+                    let shawpBal = Shawp.User(result.user,result.network).balance || 0
+                    let effectiveTier = await AvalonStake.getEffectiveTier(result.user, shawpBal)
+                    result.tier = effectiveTier
+                    cb(null,result)
+                }
+            } else {
+                let shawpBal = Shawp.User(result.user,result.network).balance || 0
+                let effectiveTier = await AvalonStake.getEffectiveTier(result.user, shawpBal)
+                result.tier = effectiveTier
+                cb(null,result)
+            }
         })
     },
     scAuth: (access_token,needscredits,cb) => {
         if (!access_token) return cb('Missing access token')
         let scapi = new HiveSigner.Client({ accessToken: access_token })
-        scapi.me((err,result) => {
+        scapi.me(async (err,result) => {
             if (err) return cb(err)
             if (Config.whitelistEnabled && !auth.isInWhitelist(result.user,'hive'))
                 return cb('Uploader access denied!')
+            let authNetwork = 'hive'
+            if (auth.isInWhitelist(result.account.name,null))
+                authNetwork = 'all'
+
             if (Config.Shawp.Enabled && needscredits) {
-                let network = 'hive'
-                if (auth.isInWhitelist(result.user,null))
-                    network = 'all'
-                let daysRemaining = Shawp.getDaysRemaining(result.user,network)
+                let daysRemaining = Shawp.getDaysRemaining(result.account.name,authNetwork)
                 if (daysRemaining.days === 0 && daysRemaining.needs)
-                    cb('Insufficient hosting credits, needs additional ' + Math.ceil(daysRemaining.needs) + ' GBdays.')
-                }
-                
-                if (auth.isInWhitelist(result.account.name,null))
-                    cb(null,result.account.name,'all')
-                else
-                    cb(null,result.account.name,'hive')
+                    return cb('Insufficient hosting credits, needs additional ' + Math.ceil(daysRemaining.needs) + ' GBdays.')
+            }
+
+            let shawpBal = Shawp.User(result.account.name,authNetwork).balance || 0
+            let effectiveTier = await AvalonStake.getEffectiveTier(result.account.name, shawpBal)
+            cb(null,result.account.name,authNetwork,effectiveTier)
         })
     },
     authenticate: (access_token,keychain,needscredits,cb) => {
@@ -132,12 +147,12 @@ let auth = {
         if (keychain === 'true') {
             auth.verifyAuth(access_token,needscredits,(err,result) => {
                 if (err) return cb(err)
-                else return cb(null,result.user,result.network)
+                else return cb(null,result.user,result.network,result.tier)
             })
         } else {
-            auth.scAuth(access_token,needscredits,(err,user,network) => {
+            auth.scAuth(access_token,needscredits,(err,user,network,tier) => {
                 if (err) return cb(err)
-                else return cb(null,user,network)
+                else return cb(null,user,network,tier)
             })
         }
     },
