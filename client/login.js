@@ -1,4 +1,4 @@
-let config, shawpconfig
+let config
 let avalonKcToggled = false
 window.logins = {}
 
@@ -40,12 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     axios.get('/shawp_config').then((result) => {
-        shawpconfig = result.data
-        if (shawpconfig.Enabled) {
+        window.shawpconfig = result.data
+        if (window.shawpconfig.Enabled) {
             updateDisplayByIDs(['homepagePriceLbl'],[])
             document.getElementById('signupButton').style.display = 'inline-block'
         }
-        document.getElementById('homepagePriceLbl').innerText = '$' + (shawpconfig.DefaultUSDRate * 30) + '/GB/month'
+        document.getElementById('homepagePriceLbl').innerText = '$' + (window.shawpconfig.DefaultUSDRate * 30) + '/GB/month'
         disablePaymentMethods()
     })
     document.getElementById('authButton').onclick = loginBtnClicked
@@ -277,10 +277,10 @@ function getPaymentInfo() {
         switch (paymentMethod) {
             case 'HIVE':
             case 'HBD':
-                hivePaymentClickListener(receipient,shawpconfig.HiveReceiver,amt,paymentMethod,memo,'signup')
+                hivePaymentClickListener(receipient,window.shawpconfig.HiveReceiver,amt,paymentMethod,memo,'signup')
                 break
             case 'BLURT':
-                blurtPaymentClickListener(receipient,shawpconfig.BlurtReceiver,amt,paymentMethod,memo,'signup')
+                blurtPaymentClickListener(receipient,window.shawpconfig.BlurtReceiver,amt,paymentMethod,memo,'signup')
                 break
             default:
                 break

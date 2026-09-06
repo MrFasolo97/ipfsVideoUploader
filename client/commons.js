@@ -291,7 +291,8 @@ function exchageRate (coin,amount,cb) {
             break
     }
     axios.get(coingeckoUrl).then((response) => {
-        cb(null,Math.ceil(amount * shawpconfig.DefaultUSDRate / response.data.market_data.current_price.usd * Math.pow(10,precision)) / Math.pow(10,precision))
+        if (!window.shawpconfig) return cb('shawp config not loaded')
+        cb(null,Math.ceil(amount * window.shawpconfig.DefaultUSDRate / response.data.market_data.current_price.usd * Math.pow(10,precision)) / Math.pow(10,precision))
     }).catch((e) => cb(e))
 }
 
@@ -466,11 +467,12 @@ async function generateMessageToSign (username,network) {
 }
 
 function disablePaymentMethods() {
+    if (!window.shawpconfig) return
     let paymentOptions = document.getElementById('pymtMtd').getElementsByTagName('option')
     for (let i = 0; i < paymentOptions.length; i++) {
-        if ((paymentOptions[i].value == "HIVE" || paymentOptions[i].value == "HBD") && !shawpconfig.HiveReceiver)
+        if ((paymentOptions[i].value == "HIVE" || paymentOptions[i].value == "HBD") && !window.shawpconfig.HiveReceiver)
             paymentOptions[i].disabled = true
-        else if (paymentOptions[i].value === 'BLURT' && !shawpconfig.BlurtReceiver)
+        else if (paymentOptions[i].value === 'BLURT' && !window.shawpconfig.BlurtReceiver)
             paymentOptions[i].disabled = true
     }
 }

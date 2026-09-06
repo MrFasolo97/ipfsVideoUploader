@@ -111,10 +111,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 switch (paymentMethod) {
                     case 'HIVE':
                     case 'HBD':
-                        hivePaymentClickListener(username,shawpconfig.HiveReceiver,amt,paymentMethod,memo,'refill')
+                        hivePaymentClickListener(username,window.shawpconfig.HiveReceiver,amt,paymentMethod,memo,'refill')
                         break
                     case 'BLURT':
-                        blurtPaymentClickListener(username,shawpconfig.BlurtReceiver,amt,paymentMethod,memo,'refill')
+                        blurtPaymentClickListener(username,window.shawpconfig.BlurtReceiver,amt,paymentMethod,memo,'refill')
                         break
                     default:
                         break
