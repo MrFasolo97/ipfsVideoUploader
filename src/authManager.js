@@ -61,7 +61,7 @@ let auth = {
             jsonrpc: '2.0',
             method: 'condenser_api.get_accounts',
             params: [[username]]
-        }).then(res => {
+        },{ timeout: 10000, family: 4 }).then(res => {
             if (res.data.result.length === 0)
                 return cb('Account does not exist')
             let encrypted_memo

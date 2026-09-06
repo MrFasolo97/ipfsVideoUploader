@@ -41,7 +41,7 @@ const AvalonStake = {
             return { tier: cached.tier, balance: cached.balance, cached: true }
 
         try {
-            let res = await axios.get(AVALON_API + '/account/' + username, { timeout: 5000 })
+            let res = await axios.get(AVALON_API + '/account/' + username, { timeout: 5000, family: 4 })
             let account = res.data
             let dtcBalance = typeof account.balance === 'number' ? account.balance / 100 : 0
             let tier = determineTier(dtcBalance)
